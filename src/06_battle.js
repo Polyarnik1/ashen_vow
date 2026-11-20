@@ -397,9 +397,9 @@ function updateDodge(dt) {
   if (Input.p('ok') && s.cd <= 0) { s.parry = 0.2; s.cd = 0.6; sfx('swing', { vol: 0.35, rate: 1.6 }); }
   for (const p of B.pats) if (p.p.u) p.p.u(mkP(p), dt);
   for (const b of B.bullets) {
-    b.t += dt;
     if (b.dying) { b.dying += dt; continue; }
-    if (b.warn > 0) { b.warn -= dt; if (b.warn <= 0 && b.onAct) b.onAct(b); continue; }
+    if (b.warn > 0) { b.warn -= dt; if (b.warn <= 0 && b.onAct) b.onAct(b); continue; } // life/t only start counting after the warning ends
+    b.t += dt;
     if (b.upd) b.upd(b, dt);
     b.vx += b.ax * dt; b.vy += b.ay * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.rot += b.vr * dt;
     if (b.type === 'ring') b.rad += b.grow * dt;
