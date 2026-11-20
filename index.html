@@ -4132,7 +4132,16 @@ function drawSettings(x = 70, y = 60) {
 }
 
 // ---------- PAUSE MENU ----------
-const Menu = { open: false, tab: 'main', i: 0, j: 0, msg: null };
+const Menu = { open: false, tab: 'main', i: 0, j: 0, msg: null, sub: null, a: 0, top: 0 };
+const ITEM_ROWS = 8;
+function itemActs(id) { const it = ITEMS[id]; return it.heal || it.tp ? ['Использовать', 'Выбросить', 'Назад'] : ['Выбросить', 'Назад']; }
+function useItemMenu(id) {
+  const it = ITEMS[id];
+  if (it.heal) { if (G.hp >= maxHp()) { sfx('deny'); note('ОЗ уже полные', '#b8b0c8'); return; } removeItem(id); const b = G.hp; G.hp = Math.min(maxHp(), G.hp + it.heal); sfx('heal'); note(`+${G.hp - b} ОЗ`, '#8cf08c'); }
+  else if (it.tp) { sfx('deny'); note('Это можно использовать только в бою', '#b8b0c8'); }
+  else sfx('deny');
+}
+function itemClamp() { const n = G.items.length; if (!n) { Menu.tab = 'main'; Menu.sub = null; return; } Menu.j = clamp(Menu.j, 0, n - 1); if (Menu.j < Menu.top) Menu.top = Menu.j; if (Menu.j >= Menu.top + ITEM_ROWS) Menu.top = Menu.j - ITEM_ROWS + 1; Menu.top = clamp(Menu.top, 0, Math.max(0, n - ITEM_ROWS)); }
 const MENU_MAIN = ['Вещи', 'Снаряжение', 'Молитвы', 'Статус', 'Настройки', 'Закрыть'];
 function openMenu() { Menu.open = true; Menu.tab = 'main'; Menu.i = 0; sfx('select'); }
 function ownedFor(slot) { return Object.keys(EQUIP).filter(id => EQUIP[id].slot === slot && G.flags['own_' + id]); }
@@ -4145,7 +4154,7 @@ function updateMenu() {
     if (Input.p('back') || Input.p('menu')) { Menu.open = false; sfx('cancel'); return; }
     if (Input.p('ok')) {
       sfx('select'); const k = Menu.i;
-      if (k === 0) { if (!G.items.length) { sfx('deny'); return; } Menu.tab = 'items'; Menu.j = 0; }
+      if (k === 0) { if (!G.items.length) { sfx('deny'); return; } Menu.tab = 'items'; Menu.j = 0; Menu.top = 0; Menu.sub = null; }
       else if (k === 1) { Menu.tab = 'equip'; Menu.j = 0; }
       else if (k === 2) { Menu.tab = 'prayers'; Menu.j = 0; }
       else if (k === 3) Menu.tab = 'status';
@@ -4155,17 +4164,29 @@ function updateMenu() {
     return;
   }
   if (tab === 'settings') { updateSettings(); return; }
+  if (tab === 'items' && Menu.sub) {
+    const id = G.items[Menu.j]; if (!id) { Menu.sub = null; return; }
+    const opts = Menu.sub === 'confirm' ? ['Нет', 'Да'] : itemActs(id), n = opts.length;
+    if (Input.nav('up')) { Menu.a = (Menu.a + n - 1) % n; sfx('move'); }
+    if (Input.nav('down')) { Menu.a = (Menu.a + 1) % n; sfx('move'); }
+    if (Input.p('back') || Input.p('menu')) { sfx('cancel'); Menu.sub = null; return; }
+    if (Input.p('ok')) {
+      const o = opts[Menu.a];
+      if (Menu.sub === 'confirm') {
+        if (o === 'Да') { removeItem(id); sfx('cancel'); note(`Выброшено: ${ITEMS[id].n}`, '#b8b0c8'); Menu.sub = null; itemClamp(); } else { sfx('cancel'); Menu.sub = null; }
+      } else if (o === 'Использовать') { useItemMenu(id); Menu.sub = null; itemClamp(); }
+      else if (o === 'Выбросить') { if (ITEMS[id].key) { sfx('deny'); note('Эту вещь нельзя выбросить', '#b8b0c8'); } else { sfx('select'); Menu.sub = 'confirm'; Menu.a = 0; } }
+      else { sfx('cancel'); Menu.sub = null; }
+    }
+    return;
+  }
   if (Input.p('back') || Input.p('menu')) { sfx('cancel'); if (tab === 'equipSel') Menu.tab = 'equip'; else Menu.tab = 'main'; return; }
   if (tab === 'items') {
     const n = G.items.length; if (!n) { Menu.tab = 'main'; return; }
     if (Input.nav('up')) { Menu.j = (Menu.j + n - 1) % n; sfx('move'); }
     if (Input.nav('down')) { Menu.j = (Menu.j + 1) % n; sfx('move'); }
-    if (Input.p('ok')) {
-      const id = G.items[Menu.j], it = ITEMS[id];
-      if (it.heal) { if (G.hp >= maxHp()) { sfx('deny'); return; } removeItem(id); const b = G.hp; G.hp = Math.min(maxHp(), G.hp + it.heal); sfx('heal'); note(`+${G.hp - b} ОЗ`, '#8cf08c'); Menu.j = Math.min(Menu.j, G.items.length - 1); }
-      else if (it.tp) { sfx('deny'); note('Это можно использовать только в бою', '#b8b0c8'); }
-      else { sfx('deny'); }
-    }
+    itemClamp();
+    if (Input.p('ok')) { sfx('select'); Menu.sub = 'act'; Menu.a = 0; }
   } else if (tab === 'equip') {
     if (Input.nav('up')) { Menu.j = (Menu.j + 2) % 3; sfx('move'); }
     if (Input.nav('down')) { Menu.j = (Menu.j + 1) % 3; sfx('move'); }
@@ -4195,9 +4216,32 @@ function drawMenu() {
   if (tab === 'settings') { drawSettings(X + 13, Y + 40); return; }
   box(X, Y, Wd, Hd);
   if (tab === 'items') {
-    text('ВЕЩИ', X + 10, Y + 6, '#ffd75e', 8);
-    G.items.forEach((id, i) => { const y = Y + 20 + i * 11, sel = i === Menu.j; if (sel) heartCursor(X + 8, y + 2.5); text(ITEMS[id].n, X + 18, y, sel ? '#ffd75e' : (ITEMS[id].key ? '#b8d8ff' : '#e8e4f0'), 8); });
-    const cur = G.items[Menu.j]; if (cur) wrap(ITEMS[cur].d, Wd - 20, 7).forEach((l, i) => text(l, X + 10, Y + Hd - 22 + i * 10, '#8a85a0', 7));
+    text('ВЕЩИ', X + 10, Y + 6, '#ffd75e', 8); text(`${G.items.length}`, X + Wd - 10, Y + 6.5, '#8a85a0', 7, 'right');
+    const n = G.items.length;
+    for (let r = 0; r < ITEM_ROWS; r++) {
+      const i = Menu.top + r; if (i >= n) break; const id = G.items[i], y = Y + 19 + r * 10.5, sel = i === Menu.j;
+      if (sel) heartCursor(X + 8, y + 2.5);
+      text(ITEMS[id].n, X + 18, y, sel ? '#ffd75e' : (ITEMS[id].key ? '#b8d8ff' : '#e8e4f0'), 8);
+      if (ITEMS[id].key) text('особое', X + Wd - 12, y + 0.5, '#5a7aa0', 6.5, 'right');
+    }
+    if (Menu.top > 0) text('▲', X + Wd - 10, Y + 16, '#8a85a0', 6, 'right');
+    if (Menu.top + ITEM_ROWS < n) text('▼', X + Wd - 10, Y + 19 + ITEM_ROWS * 10.5 - 4, '#8a85a0', 6, 'right');
+    // description panel, separate from the list
+    ctx.fillStyle = 'rgba(255,255,255,0.16)'; ctx.fillRect(X + 8, Y + 108, Wd - 16, 1);
+    const cur = G.items[Menu.j];
+    if (cur) {
+      text(ITEMS[cur].n, X + 10, Y + 112, '#c8a85a', 7.5);
+      wrap(ITEMS[cur].d, Wd - 20, 7).slice(0, 2).forEach((l, i) => text(l, X + 10, Y + 123 + i * 9.5, '#a8a2c0', 7));
+    }
+    text(Menu.sub ? '' : 'ОК — действия', X + 10, Y + Hd - 11, '#5a5570', 6.5);
+    if (Menu.sub && cur) {
+      const opts = Menu.sub === 'confirm' ? ['Нет', 'Да'] : itemActs(cur), bw = 82, bh = opts.length * 12 + (Menu.sub === 'confirm' ? 22 : 10);
+      const bx = X + Wd - bw - 8, by = Y + 22;
+      box(bx, by, bw, bh, { border: '#c8a85a' });
+      let oy = by + 6;
+      if (Menu.sub === 'confirm') { text('Выбросить?', bx + 8, oy, '#e8a86a', 7.5); oy += 14; }
+      opts.forEach((o, i) => { const y = oy + i * 12, sel = i === Menu.a; if (sel) heartCursor(bx + 8, y + 2.5); text(o, bx + 18, y, sel ? '#ffd75e' : (o === 'Выбросить' || o === 'Да' ? '#e8a8a8' : '#e8e4f0'), 8); });
+    }
   } else if (tab === 'equip' || tab === 'equipSel') {
     text('СНАРЯЖЕНИЕ', X + 10, Y + 6, '#ffd75e', 8);
     const slots = [['Оружие', 'weapon'], ['Броня', 'armor'], ['Оберег', 'charm']];
