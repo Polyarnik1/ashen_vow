@@ -177,10 +177,61 @@ function useItemMenu(id) {
 function itemClamp() { const n = G.items.length; if (!n) { Menu.tab = 'main'; Menu.sub = null; return; } Menu.j = clamp(Menu.j, 0, n - 1); if (Menu.j < Menu.top) Menu.top = Menu.j; if (Menu.j >= Menu.top + ITEM_ROWS) Menu.top = Menu.j - ITEM_ROWS + 1; Menu.top = clamp(Menu.top, 0, Math.max(0, n - ITEM_ROWS)); }
 const MENU_MAIN = ['Вещи', 'Снаряжение', 'Молитвы', 'Статус', 'Настройки', 'Закрыть'];
 function openMenu() { Menu.open = true; Menu.tab = 'main'; Menu.i = 0; sfx('select'); }
+// ---------- MOON CHEST (shared storage, like Undertale's dimensional box) ----------
+const BOX_MAX = 16, STASH_ROWS = 9;
+const Stash = { col: 0, j: [0, 0], top: [0, 0] };
+async function openStash() {
+  if (!F('stash_seen')) { setF('stash_seen'); await nar('Лунный сундук. Всё, что в него положишь, можно достать из любого такого сундука.'); }
+  sfx('chest'); Stash.col = G.items.length ? 0 : 1; Stash.j = [0, 0]; Stash.top = [0, 0];
+  Menu.open = true; Menu.tab = 'stash';
+  await waitUntil(() => !Menu.open);
+}
+function stashList(c) { return c === 0 ? G.items : G.box; }
+function updateStash() {
+  const c = Stash.col, L = stashList(c);
+  if (Input.p('back') || Input.p('menu')) { Menu.open = false; Menu.tab = 'main'; sfx('cancel'); return; }
+  if (Input.nav('left') || Input.nav('right')) { Stash.col = 1 - c; sfx('move'); return; }
+  const n = L.length;
+  if (n) {
+    if (Input.nav('up')) { Stash.j[c] = (Stash.j[c] + n - 1) % n; sfx('move'); }
+    if (Input.nav('down')) { Stash.j[c] = (Stash.j[c] + 1) % n; sfx('move'); }
+  }
+  Stash.j[c] = clamp(Stash.j[c], 0, Math.max(0, n - 1));
+  if (Stash.j[c] < Stash.top[c]) Stash.top[c] = Stash.j[c];
+  if (Stash.j[c] >= Stash.top[c] + STASH_ROWS) Stash.top[c] = Stash.j[c] - STASH_ROWS + 1;
+  Stash.top[c] = clamp(Stash.top[c], 0, Math.max(0, n - STASH_ROWS));
+  if (Input.p('ok') && n) {
+    const id = L[Stash.j[c]];
+    if (c === 0) { if (G.box.length >= BOX_MAX) { sfx('deny'); note('Сундук полон', '#b8b0c8'); return; } G.items.splice(Stash.j[0], 1); G.box.push(id); sfx('select'); }
+    else { const keep = G.box.splice(Stash.j[1], 1)[0]; if (!addItem(keep)) { G.box.splice(Stash.j[1], 0, keep); sfx('deny'); note('Сумка полна', '#b8b0c8'); return; } sfx('select'); }
+  }
+}
+function drawStash() {
+  const cols = [['СУМКА', G.items, 8, `${G.items.filter(i => !ITEMS[i].key).length}/12`], ['СУНДУК', G.box, 164, `${G.box.length}/${BOX_MAX}`]];
+  cols.forEach(([title, L, X, cnt], c) => {
+    const act = Stash.col === c;
+    box(X, 8, 148, 128, { border: act ? '#c8a85a' : '#5a5570' });
+    text(title, X + 10, 14, act ? '#ffd75e' : '#8a85a0', 8); text(cnt, X + 138, 14.5, '#8a85a0', 7, 'right');
+    if (!L.length) text('пусто', X + 74, 70, '#5a5570', 8, 'center');
+    for (let r = 0; r < STASH_ROWS; r++) {
+      const i = Stash.top[c] + r; if (i >= L.length) break; const id = L[i], y = 28 + r * 11, sel = act && i === Stash.j[c];
+      if (sel) heartCursor(X + 8, y + 2.5);
+      text(ITEMS[id].n, X + 18, y, sel ? '#ffd75e' : (ITEMS[id].key ? '#b8d8ff' : (act ? '#e8e4f0' : '#9a96b0')), 7.5);
+    }
+    if (Stash.top[c] > 0) text('▲', X + 140, 24, '#8a85a0', 6, 'right');
+    if (Stash.top[c] + STASH_ROWS < L.length) text('▼', X + 140, 124, '#8a85a0', 6, 'right');
+  });
+  box(8, 140, 304, 32);
+  const cur = stashList(Stash.col)[Stash.j[Stash.col]];
+  if (cur) { text(ITEMS[cur].n, 16, 146, '#c8a85a', 7.5); text(ITEMS[cur].d, 16, 157, '#a8a2c0', 7); }
+  else text(Stash.col === 0 ? 'В сумке ничего нет.' : 'Сундук пуст.', 16, 150, '#5a5570', 7.5);
+  text(Stash.col === 0 ? 'ОК — в сундук   ◄► — сменить' : 'ОК — в сумку   ◄► — сменить', 304, 163, '#5a5570', 6.5, 'right');
+}
 function ownedFor(slot) { return Object.keys(EQUIP).filter(id => EQUIP[id].slot === slot && G.flags['own_' + id]); }
 function updateMenu() {
-  if (Script.active && Menu.tab !== 'settings') return;
+  if (Script.active && Menu.tab !== 'settings' && Menu.tab !== 'stash') return;
   const tab = Menu.tab;
+  if (tab === 'stash') { updateStash(); return; }
   if (tab === 'main') {
     if (Input.nav('up')) { Menu.i = (Menu.i + MENU_MAIN.length - 1) % MENU_MAIN.length; sfx('move'); }
     if (Input.nav('down')) { Menu.i = (Menu.i + 1) % MENU_MAIN.length; sfx('move'); }
@@ -235,6 +286,7 @@ function updateMenu() {
 }
 function drawMenu() {
   uiT();
+  if (Menu.tab === 'stash') { drawStash(); return; }
   // side panel
   box(8, 8, 92, 104, { border: '#c8a85a' });
   MENU_MAIN.forEach((m, i) => { const y = 16 + i * 14, sel = i === Menu.i; if (sel) heartCursor(14, y + 2.5); text(m, 24, y, sel ? '#ffd75e' : '#e8e4f0', 8); });

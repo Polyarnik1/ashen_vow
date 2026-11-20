@@ -112,7 +112,7 @@ function entBox(e) { return { x: e.x - 6, y: e.y - 5, w: 12, h: 8 }; }
 function isSolidEnt(e) {
   if (e.hidden) return false;
   if (e.type === 'gate') return !F(e.flag);
-  return ['npc', 'chest', 'shrine', 'sign', 'lever', 'block', 'brazier', 'boss', 'obj'].includes(e.type) && !e.ghost;
+  return ['npc', 'chest', 'shrine', 'sign', 'lever', 'block', 'brazier', 'boss', 'obj', 'stash'].includes(e.type) && !e.ghost;
 }
 function rectHit(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function blockedAt(px, py, ignore) {
@@ -314,7 +314,7 @@ function interact() {
   const fx = p.x + dx * 13, fy = p.y + dy * 11 - 2;
   let best = null, bd = 99;
   for (const e of World.ents) {
-    if (e.hidden || !(e.talk || e.type === 'chest' || e.type === 'shrine' || e.type === 'sign' || e.type === 'lever' || e.type === 'brazier' || e.act)) continue;
+    if (e.hidden || !(e.talk || e.type === 'chest' || e.type === 'stash' || e.type === 'shrine' || e.type === 'sign' || e.type === 'lever' || e.type === 'brazier' || e.act)) continue;
     const d = dist(fx, fy, e.x, e.y - 4); if (d < 14 && d < bd) { bd = d; best = e; }
   }
   if (best) { run(() => interactEnt(best)); return; }
@@ -337,6 +337,7 @@ async function interactEnt(e) {
     if (e.after) await e.after();
     return;
   }
+  if (e.type === 'stash') { await openStash(); return; }
   if (e.type === 'shrine') { await TALK.shrine(e); return; }
   if (e.type === 'sign') { await nar(e.text); return; }
   if (e.type === 'lever' || e.type === 'brazier') { if (e.act) await e.act(e); return; }
@@ -371,6 +372,7 @@ function drawEntSprite(g, e, cx, cy) {
   const S = SPR;
   switch (e.type) {
     case 'chest': g.drawImage(F('chest_' + World.id + e.id) ? S.chest1 : S.chest0, x - 8, y - 14); break;
+    case 'stash': { const k = 0.5 + 0.5 * Math.sin(World.t * 2.5 + e.x); g.drawImage(S.stash, x - 8, y - 14); g.globalAlpha = 0.5 + 0.5 * k; g.fillStyle = '#d8b8ff'; g.fillRect(x - 1, y - 7, 2, 3); g.fillRect(x - 2, y - 6, 4, 1); g.globalAlpha = 1; g.globalAlpha = 0.25 * k; g.drawImage(glowSprite(12, 'rgba(190,150,255,1)'), x - 12, y - 18); g.globalAlpha = 1; break; }
     case 'shrine': {
       g.drawImage(S.shrine, x - 8, y - 26);
       drawFlame(g, x, y - 18, 1.2, World.t, 'blue');
@@ -443,6 +445,7 @@ function drawLighting(g, cx, cy) {
   for (const o of World.objs) if (o.light) lights.push([o.x, o.y - 10, o.light[0], o.light[1], 1]);
   for (const e of World.ents) {
     if (e.type === 'shrine') lights.push([e.x, e.y - 18, 46, 'blue', 1]);
+    if (e.type === 'stash') lights.push([e.x, e.y - 8, 30, 'blue', 0.8]);
     if (e.type === 'brazier' && e.lit) lights.push([e.x, e.y - 8, 52, e.col === 'blue' ? 'blue' : 'fire', 1]);
     if (e.light) lights.push([e.x, e.y - 10, e.light[0], e.light[1], 1]);
     if (e.mon === 'wisp') lights.push([e.x, e.y - 10, 28, 'green', 1]);
@@ -479,7 +482,7 @@ function drawWorldUI() {
   // interact hint
   if (canControl() && isTouch) {
     const p = World.player; const [dx, dy] = DIRV[p.dir]; const fx = p.x + dx * 13, fy = p.y + dy * 11 - 2;
-    for (const e of World.ents) { if (e.hidden || !(e.talk || ['chest', 'shrine', 'sign', 'lever', 'brazier'].includes(e.type) || e.act)) continue; if (dist(fx, fy, e.x, e.y - 4) < 14) { const x = e.x - cx, y = e.y - cy - 32 + Math.sin(TIME * 5); ctx.fillStyle = '#ffd75e'; ctx.fillRect(x - 1, y, 3, 3); ctx.fillRect(x, y + 3, 1, 1); break; } }
+    for (const e of World.ents) { if (e.hidden || !(e.talk || ['chest', 'stash', 'shrine', 'sign', 'lever', 'brazier'].includes(e.type) || e.act)) continue; if (dist(fx, fy, e.x, e.y - 4) < 14) { const x = e.x - cx, y = e.y - cy - 32 + Math.sin(TIME * 5); ctx.fillStyle = '#ffd75e'; ctx.fillRect(x - 1, y, 3, 3); ctx.fillRect(x, y + 3, 1, 1); break; } }
   }
   // area name card
   if (World.areaCard) { const t = World.areaCard.t += 1 / 60; const a = t < 0.5 ? t / 0.5 : t > 2.5 ? Math.max(0, 1 - (t - 2.5) / 0.6) : 1; ctx.globalAlpha = a; text(World.areaCard.s, 12, 10, '#e8e0d0', 10, 'left', { w: 500 }); ctx.fillStyle = '#c8a85a'; ctx.fillRect(12, 24, tw(World.areaCard.s, 10) * Math.min(1, t * 1.5), 0.6); ctx.globalAlpha = 1; if (t > 3.2) World.areaCard = null; }

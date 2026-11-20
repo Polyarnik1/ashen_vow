@@ -2,7 +2,7 @@
 const NEWG = () => ({
   hp: 40, lv: 1, exp: 0, gold: 0, tp: 0,
   items: ['bread', 'bread'], weapon: 'osword', armor: 'olds', charm: null,
-  prayers: ['heal'], flags: {}, defeated: {}, killed: 0, spared: 0, voices: 0,
+  prayers: ['heal'], box: [], flags: {}, defeated: {}, killed: 0, spared: 0, voices: 0,
   map: 'chapel', x: 0, y: 0, dir: 0, time: 0, chapter: 'Пролог'
 });
 let G = NEWG();
@@ -53,7 +53,7 @@ function setF(k, v = true) { G.flags[k] = v; }
 function saveGame() {
   try { localStorage.setItem('ashen_save', JSON.stringify(G)); return true; } catch (e) { return false; }
 }
-function loadSave() { try { const s = localStorage.getItem('ashen_save'); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+function loadSave() { try { const s = localStorage.getItem('ashen_save'); if (!s) return null; const o = JSON.parse(s); if (!o.box) o.box = []; return o; } catch (e) { return null; } }
 function fmtTime(s) { const m = Math.floor(s / 60), h = Math.floor(m / 60); return h + ':' + String(m % 60).padStart(2, '0'); }
 
 // ================= SCRIPT RUNNER =================

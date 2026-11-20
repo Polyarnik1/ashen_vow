@@ -764,6 +764,7 @@ function makeObjects() {
   SPR.lever1 = pixelize(mk(16, 16, g => { R(g, 4, 11, 8, 4, '#3a3a44'); line(g, 8, 12, 13, 6, '#6a6a7a', 2); circ(g, 13, 6, 2, '#30a050'); }));
   SPR.chest0 = pixelize(mk(16, 16, g => { R(g, 1, 5, 14, 10, '#5a3a20'); R(g, 1, 3, 14, 4, '#6e4828'); R(g, 1, 7, 14, 1, '#2a1a10'); R(g, 1, 3, 1, 12, '#a08a4a'); R(g, 14, 3, 1, 12, '#a08a4a'); R(g, 7, 6, 2, 3, '#d8b85a'); }));
   SPR.chest1 = pixelize(mk(16, 16, g => { R(g, 1, 7, 14, 8, '#5a3a20'); R(g, 1, 2, 14, 3, '#6e4828'); R(g, 2, 5, 12, 2, '#120a06'); R(g, 1, 2, 1, 13, '#a08a4a'); R(g, 14, 2, 1, 13, '#a08a4a'); }));
+  SPR.stash = pixelize(mk(16, 16, g => { R(g, 1, 5, 14, 10, '#54408a'); R(g, 1, 3, 14, 4, '#6a54a8'); R(g, 1, 7, 14, 1, '#1a1030'); R(g, 1, 3, 1, 12, '#b8b0d8'); R(g, 14, 3, 1, 12, '#b8b0d8'); R(g, 1, 14, 14, 1, '#1a1030'); R(g, 2, 3, 12, 1, '#7a68a8'); for (const x of [3, 11]) R(g, x, 9, 2, 2, '#8a7ac0'); R(g, 6, 8, 4, 4, '#241838'); R(g, 7, 9, 2, 2, '#d8b8ff'); R(g, 0, 2, 3, 3, '#8a82b0'); R(g, 13, 2, 3, 3, '#8a82b0'); }));
   SPR.shrine = pixelize(mk(16, 28, g => { R(g, 4, 22, 8, 5, '#3a3a4a'); R(g, 3, 25, 10, 3, '#2a2a36'); R(g, 6, 10, 4, 12, '#e8e2d0'); R(g, 6, 10, 1, 12, '#b8b2a0'); R(g, 5, 18, 2, 4, '#d8d2c0'); R(g, 9, 15, 2, 3, '#d8d2c0'); R(g, 7, 8, 1, 2, '#222'); }));
   SPR.sign = pixelize(mk(16, 16, g => { R(g, 7, 8, 2, 8, '#3a2618'); R(g, 2, 2, 12, 7, '#5a3e26'); R(g, 4, 4, 8, 1, '#2a1a10'); R(g, 4, 6, 6, 1, '#2a1a10'); }));
   SPR.bones = pixelize(mk(16, 10, g => { circ(g, 5, 5, 3, '#c8c2b0'); R(g, 4, 5, 1, 1, '#111'); R(g, 6, 5, 1, 1, '#111'); line(g, 8, 7, 14, 4, '#b8b2a0', 2); line(g, 9, 3, 14, 8, '#a8a290', 1.5); }));
@@ -1389,7 +1390,7 @@ function knight(pose, t, f2 = 0) {
 const NEWG = () => ({
   hp: 40, lv: 1, exp: 0, gold: 0, tp: 0,
   items: ['bread', 'bread'], weapon: 'osword', armor: 'olds', charm: null,
-  prayers: ['heal'], flags: {}, defeated: {}, killed: 0, spared: 0, voices: 0,
+  prayers: ['heal'], box: [], flags: {}, defeated: {}, killed: 0, spared: 0, voices: 0,
   map: 'chapel', x: 0, y: 0, dir: 0, time: 0, chapter: 'Пролог'
 });
 let G = NEWG();
@@ -1440,7 +1441,7 @@ function setF(k, v = true) { G.flags[k] = v; }
 function saveGame() {
   try { localStorage.setItem('ashen_save', JSON.stringify(G)); return true; } catch (e) { return false; }
 }
-function loadSave() { try { const s = localStorage.getItem('ashen_save'); return s ? JSON.parse(s) : null; } catch (e) { return null; } }
+function loadSave() { try { const s = localStorage.getItem('ashen_save'); if (!s) return null; const o = JSON.parse(s); if (!o.box) o.box = []; return o; } catch (e) { return null; } }
 function fmtTime(s) { const m = Math.floor(s / 60), h = Math.floor(m / 60); return h + ':' + String(m % 60).padStart(2, '0'); }
 
 // ================= SCRIPT RUNNER =================
@@ -1682,7 +1683,7 @@ function entBox(e) { return { x: e.x - 6, y: e.y - 5, w: 12, h: 8 }; }
 function isSolidEnt(e) {
   if (e.hidden) return false;
   if (e.type === 'gate') return !F(e.flag);
-  return ['npc', 'chest', 'shrine', 'sign', 'lever', 'block', 'brazier', 'boss', 'obj'].includes(e.type) && !e.ghost;
+  return ['npc', 'chest', 'shrine', 'sign', 'lever', 'block', 'brazier', 'boss', 'obj', 'stash'].includes(e.type) && !e.ghost;
 }
 function rectHit(a, b) { return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y; }
 function blockedAt(px, py, ignore) {
@@ -1884,7 +1885,7 @@ function interact() {
   const fx = p.x + dx * 13, fy = p.y + dy * 11 - 2;
   let best = null, bd = 99;
   for (const e of World.ents) {
-    if (e.hidden || !(e.talk || e.type === 'chest' || e.type === 'shrine' || e.type === 'sign' || e.type === 'lever' || e.type === 'brazier' || e.act)) continue;
+    if (e.hidden || !(e.talk || e.type === 'chest' || e.type === 'stash' || e.type === 'shrine' || e.type === 'sign' || e.type === 'lever' || e.type === 'brazier' || e.act)) continue;
     const d = dist(fx, fy, e.x, e.y - 4); if (d < 14 && d < bd) { bd = d; best = e; }
   }
   if (best) { run(() => interactEnt(best)); return; }
@@ -1907,6 +1908,7 @@ async function interactEnt(e) {
     if (e.after) await e.after();
     return;
   }
+  if (e.type === 'stash') { await openStash(); return; }
   if (e.type === 'shrine') { await TALK.shrine(e); return; }
   if (e.type === 'sign') { await nar(e.text); return; }
   if (e.type === 'lever' || e.type === 'brazier') { if (e.act) await e.act(e); return; }
@@ -1941,6 +1943,7 @@ function drawEntSprite(g, e, cx, cy) {
   const S = SPR;
   switch (e.type) {
     case 'chest': g.drawImage(F('chest_' + World.id + e.id) ? S.chest1 : S.chest0, x - 8, y - 14); break;
+    case 'stash': { const k = 0.5 + 0.5 * Math.sin(World.t * 2.5 + e.x); g.drawImage(S.stash, x - 8, y - 14); g.globalAlpha = 0.5 + 0.5 * k; g.fillStyle = '#d8b8ff'; g.fillRect(x - 1, y - 7, 2, 3); g.fillRect(x - 2, y - 6, 4, 1); g.globalAlpha = 1; g.globalAlpha = 0.25 * k; g.drawImage(glowSprite(12, 'rgba(190,150,255,1)'), x - 12, y - 18); g.globalAlpha = 1; break; }
     case 'shrine': {
       g.drawImage(S.shrine, x - 8, y - 26);
       drawFlame(g, x, y - 18, 1.2, World.t, 'blue');
@@ -2013,6 +2016,7 @@ function drawLighting(g, cx, cy) {
   for (const o of World.objs) if (o.light) lights.push([o.x, o.y - 10, o.light[0], o.light[1], 1]);
   for (const e of World.ents) {
     if (e.type === 'shrine') lights.push([e.x, e.y - 18, 46, 'blue', 1]);
+    if (e.type === 'stash') lights.push([e.x, e.y - 8, 30, 'blue', 0.8]);
     if (e.type === 'brazier' && e.lit) lights.push([e.x, e.y - 8, 52, e.col === 'blue' ? 'blue' : 'fire', 1]);
     if (e.light) lights.push([e.x, e.y - 10, e.light[0], e.light[1], 1]);
     if (e.mon === 'wisp') lights.push([e.x, e.y - 10, 28, 'green', 1]);
@@ -2049,7 +2053,7 @@ function drawWorldUI() {
   // interact hint
   if (canControl() && isTouch) {
     const p = World.player; const [dx, dy] = DIRV[p.dir]; const fx = p.x + dx * 13, fy = p.y + dy * 11 - 2;
-    for (const e of World.ents) { if (e.hidden || !(e.talk || ['chest', 'shrine', 'sign', 'lever', 'brazier'].includes(e.type) || e.act)) continue; if (dist(fx, fy, e.x, e.y - 4) < 14) { const x = e.x - cx, y = e.y - cy - 32 + Math.sin(TIME * 5); ctx.fillStyle = '#ffd75e'; ctx.fillRect(x - 1, y, 3, 3); ctx.fillRect(x, y + 3, 1, 1); break; } }
+    for (const e of World.ents) { if (e.hidden || !(e.talk || ['chest', 'stash', 'shrine', 'sign', 'lever', 'brazier'].includes(e.type) || e.act)) continue; if (dist(fx, fy, e.x, e.y - 4) < 14) { const x = e.x - cx, y = e.y - cy - 32 + Math.sin(TIME * 5); ctx.fillStyle = '#ffd75e'; ctx.fillRect(x - 1, y, 3, 3); ctx.fillRect(x, y + 3, 1, 1); break; } }
   }
   // area name card
   if (World.areaCard) { const t = World.areaCard.t += 1 / 60; const a = t < 0.5 ? t / 0.5 : t > 2.5 ? Math.max(0, 1 - (t - 2.5) / 0.6) : 1; ctx.globalAlpha = a; text(World.areaCard.s, 12, 10, '#e8e0d0', 10, 'left', { w: 500 }); ctx.fillStyle = '#c8a85a'; ctx.fillRect(12, 24, tw(World.areaCard.s, 10) * Math.min(1, t * 1.5), 0.6); ctx.globalAlpha = 1; if (t > 3.2) World.areaCard = null; }
@@ -3179,6 +3183,7 @@ const MAPS = {};
     { type: 'house', id: 'chap', x: 20, y: 33, w: 9, h: 5, door: 4, doorOpen: true, roof: '#26222e', wall: '#3a3a4a', windows: [0.18, 0.82], chimney: false },
     { type: 'exit', x: 24, y: 37, to: 'chapel', tx: 10, ty: 12, dir: 3 },
     { type: 'shrine', id: 's2', x: 27, y: 24 },
+    { type: 'stash', id: 'st2', x: 25, y: 24 },
     { type: 'sign', x: 25, y: 30, text: '↑ Терновая Стена.  ← Старая роща.  → Забытые могилы.' },
     { type: 'npc', id: 'lantern', x: 7, y: 16, talk: 'ivelMeet', obj: 'lantern', fixed: true, cond: () => !F('ivel'), light: [30, 'blue'] },
     { type: 'chest', id: 'f1', x: 41, y: 19, item: 'herb' },
@@ -3241,6 +3246,7 @@ const MAPS = {};
     { type: 'npc', id: 'vD', x: 38, y: 19, char: 'villagerD', talk: 'vD', wander: true },
     { type: 'npc', id: 'gareth_v', x: 25, y: 11, char: 'gareth', talk: 'garethV', cond: () => F('gareth_spared') },
     { type: 'shrine', id: 's3', x: 25, y: 16 },
+    { type: 'stash', id: 'st3', x: 27, y: 17 },
     { type: 'sign', x: 21, y: 33, text: 'ТЕРНОВАЯ СТЕНА. Путник, шипы — для мёртвых, а не для тебя.' },
     { type: 'sign', x: 11, y: 24, text: 'Кладбище Ордена. Не тревожьте покой спящих.' },
     { type: 'exit', x: 22, y: 35, w: 2, h: 1, to: 'forest', tx: 21, ty: 1, dir: 0 },
@@ -3328,6 +3334,7 @@ const MAPS = {};
   const ents = [
     { type: 'exit', x: 19, y: 1, to: 'village', tx: 5, ty: 28, dir: 0 },
     { type: 'shrine', id: 's5', x: 21, y: 4 },
+    { type: 'stash', id: 'st5', x: 19, y: 4 },
     { type: 'sign', x: 18, y: 9, text: '«Луна встаёт на востоке, в полдень глядит с юга, садится на западе и спит на севере. Зажги её путь — и спящий проснётся».' },
     { type: 'brazier', id: 'bN', x: 19, y: 12, dirn: 'N', act: e => STORY.brazier(e), col: 'green' },
     { type: 'brazier', id: 'bE', x: 25, y: 15, dirn: 'E', act: e => STORY.brazier(e), col: 'green' },
@@ -3372,6 +3379,7 @@ const MAPS = {};
   const ents = [
     { type: 'exit', x: 21, y: 39, w: 2, h: 1, to: 'village', tx: 22, ty: 2, dir: 0 },
     { type: 'shrine', id: 's6', x: 26, y: 16 },
+    { type: 'stash', id: 'st6', x: 28, y: 16 },
     { type: 'lever', id: 'kl', x: 6, y: 31, flag: 'keep_bridge', act: e => STORY.bridgeLever(e) },
     { type: 'chest', id: 'q1', x: 4, y: 4, item: 'elixir' },
     { type: 'chest', id: 'q2', x: 39, y: 4, item: 'moonst' },
@@ -3422,6 +3430,7 @@ const MAPS = {};
     { type: 'npc', id: 'sl3', x: 11, y: 12, char: 'sleeper2', talk: 'sleeper', sleeper: true, fixed: true, dir: 2 },
     { type: 'npc', id: 'ela', x: 23, y: 30, char: 'ghostgirl', talk: 'ela', ghostly: true, float: true, light: [26, 'moon'] },
     { type: 'shrine', id: 's7', x: 26, y: 33 },
+    { type: 'stash', id: 'st7', x: 28, y: 33 },
     { type: 'chest', id: 'sk1', x: 41, y: 30, item: 'pale' },
     { type: 'chest', id: 'sk2', x: 4, y: 12, item: 'holy' },
     { type: 'chest', id: 'sk3', x: 33, y: 13, item: 'elixir' },
@@ -3451,6 +3460,7 @@ const MAPS = {};
     { type: 'exit', x: 0, y: 7, w: 1, h: 8, to: 'sleeping', tx: 23, ty: 1, dir: 0 },
     { type: 'exit', x: 71, y: 7, w: 1, h: 8, to: 'lake', tx: 17, ty: 37, dir: 3 },
     { type: 'shrine', id: 's8', x: 38, y: 12 },
+    { type: 'stash', id: 'st8', x: 40, y: 12 },
     { type: 'enemy', id: 'm1', x: 14, y: 10, mon: 'moth', flying: true },
     { type: 'enemy', id: 'm2', x: 26, y: 11, mon: 'drowned', speed: 38 },
     { type: 'enemy', id: 'm3', x: 46, y: 10, mon: 'moth', flying: true, group: ['moth', 'moth'] },
@@ -3478,6 +3488,7 @@ const MAPS = {};
   const ents = [
     { type: 'exit', x: 10, y: 39, w: 16, h: 1, to: 'moonroad', tx: 70, ty: 10, dir: 1 },
     { type: 'shrine', id: 's9', x: 21, y: 13 },
+    { type: 'stash', id: 'st9', x: 23, y: 13 },
     { type: 'enemy', id: 'l1', x: 14, y: 35, mon: 'drowned', speed: 36 },
     { type: 'enemy', id: 'l2', x: 18, y: 15, mon: 'drowned', speed: 36, group: ['drowned', 'drowned'] },
     { type: 'enemy', id: 'l3', x: 20, y: 34, mon: 'moth', flying: true, group: ['moth', 'shade'] },
@@ -4188,10 +4199,61 @@ function useItemMenu(id) {
 function itemClamp() { const n = G.items.length; if (!n) { Menu.tab = 'main'; Menu.sub = null; return; } Menu.j = clamp(Menu.j, 0, n - 1); if (Menu.j < Menu.top) Menu.top = Menu.j; if (Menu.j >= Menu.top + ITEM_ROWS) Menu.top = Menu.j - ITEM_ROWS + 1; Menu.top = clamp(Menu.top, 0, Math.max(0, n - ITEM_ROWS)); }
 const MENU_MAIN = ['Вещи', 'Снаряжение', 'Молитвы', 'Статус', 'Настройки', 'Закрыть'];
 function openMenu() { Menu.open = true; Menu.tab = 'main'; Menu.i = 0; sfx('select'); }
+// ---------- MOON CHEST (shared storage, like Undertale's dimensional box) ----------
+const BOX_MAX = 16, STASH_ROWS = 9;
+const Stash = { col: 0, j: [0, 0], top: [0, 0] };
+async function openStash() {
+  if (!F('stash_seen')) { setF('stash_seen'); await nar('Лунный сундук. Всё, что в него положишь, можно достать из любого такого сундука.'); }
+  sfx('chest'); Stash.col = G.items.length ? 0 : 1; Stash.j = [0, 0]; Stash.top = [0, 0];
+  Menu.open = true; Menu.tab = 'stash';
+  await waitUntil(() => !Menu.open);
+}
+function stashList(c) { return c === 0 ? G.items : G.box; }
+function updateStash() {
+  const c = Stash.col, L = stashList(c);
+  if (Input.p('back') || Input.p('menu')) { Menu.open = false; Menu.tab = 'main'; sfx('cancel'); return; }
+  if (Input.nav('left') || Input.nav('right')) { Stash.col = 1 - c; sfx('move'); return; }
+  const n = L.length;
+  if (n) {
+    if (Input.nav('up')) { Stash.j[c] = (Stash.j[c] + n - 1) % n; sfx('move'); }
+    if (Input.nav('down')) { Stash.j[c] = (Stash.j[c] + 1) % n; sfx('move'); }
+  }
+  Stash.j[c] = clamp(Stash.j[c], 0, Math.max(0, n - 1));
+  if (Stash.j[c] < Stash.top[c]) Stash.top[c] = Stash.j[c];
+  if (Stash.j[c] >= Stash.top[c] + STASH_ROWS) Stash.top[c] = Stash.j[c] - STASH_ROWS + 1;
+  Stash.top[c] = clamp(Stash.top[c], 0, Math.max(0, n - STASH_ROWS));
+  if (Input.p('ok') && n) {
+    const id = L[Stash.j[c]];
+    if (c === 0) { if (G.box.length >= BOX_MAX) { sfx('deny'); note('Сундук полон', '#b8b0c8'); return; } G.items.splice(Stash.j[0], 1); G.box.push(id); sfx('select'); }
+    else { const keep = G.box.splice(Stash.j[1], 1)[0]; if (!addItem(keep)) { G.box.splice(Stash.j[1], 0, keep); sfx('deny'); note('Сумка полна', '#b8b0c8'); return; } sfx('select'); }
+  }
+}
+function drawStash() {
+  const cols = [['СУМКА', G.items, 8, `${G.items.filter(i => !ITEMS[i].key).length}/12`], ['СУНДУК', G.box, 164, `${G.box.length}/${BOX_MAX}`]];
+  cols.forEach(([title, L, X, cnt], c) => {
+    const act = Stash.col === c;
+    box(X, 8, 148, 128, { border: act ? '#c8a85a' : '#5a5570' });
+    text(title, X + 10, 14, act ? '#ffd75e' : '#8a85a0', 8); text(cnt, X + 138, 14.5, '#8a85a0', 7, 'right');
+    if (!L.length) text('пусто', X + 74, 70, '#5a5570', 8, 'center');
+    for (let r = 0; r < STASH_ROWS; r++) {
+      const i = Stash.top[c] + r; if (i >= L.length) break; const id = L[i], y = 28 + r * 11, sel = act && i === Stash.j[c];
+      if (sel) heartCursor(X + 8, y + 2.5);
+      text(ITEMS[id].n, X + 18, y, sel ? '#ffd75e' : (ITEMS[id].key ? '#b8d8ff' : (act ? '#e8e4f0' : '#9a96b0')), 7.5);
+    }
+    if (Stash.top[c] > 0) text('▲', X + 140, 24, '#8a85a0', 6, 'right');
+    if (Stash.top[c] + STASH_ROWS < L.length) text('▼', X + 140, 124, '#8a85a0', 6, 'right');
+  });
+  box(8, 140, 304, 32);
+  const cur = stashList(Stash.col)[Stash.j[Stash.col]];
+  if (cur) { text(ITEMS[cur].n, 16, 146, '#c8a85a', 7.5); text(ITEMS[cur].d, 16, 157, '#a8a2c0', 7); }
+  else text(Stash.col === 0 ? 'В сумке ничего нет.' : 'Сундук пуст.', 16, 150, '#5a5570', 7.5);
+  text(Stash.col === 0 ? 'ОК — в сундук   ◄► — сменить' : 'ОК — в сумку   ◄► — сменить', 304, 163, '#5a5570', 6.5, 'right');
+}
 function ownedFor(slot) { return Object.keys(EQUIP).filter(id => EQUIP[id].slot === slot && G.flags['own_' + id]); }
 function updateMenu() {
-  if (Script.active && Menu.tab !== 'settings') return;
+  if (Script.active && Menu.tab !== 'settings' && Menu.tab !== 'stash') return;
   const tab = Menu.tab;
+  if (tab === 'stash') { updateStash(); return; }
   if (tab === 'main') {
     if (Input.nav('up')) { Menu.i = (Menu.i + MENU_MAIN.length - 1) % MENU_MAIN.length; sfx('move'); }
     if (Input.nav('down')) { Menu.i = (Menu.i + 1) % MENU_MAIN.length; sfx('move'); }
@@ -4246,6 +4308,7 @@ function updateMenu() {
 }
 function drawMenu() {
   uiT();
+  if (Menu.tab === 'stash') { drawStash(); return; }
   // side panel
   box(8, 8, 92, 104, { border: '#c8a85a' });
   MENU_MAIN.forEach((m, i) => { const y = 16 + i * 14, sel = i === Menu.i; if (sel) heartCursor(14, y + 2.5); text(m, 24, y, sel ? '#ffd75e' : '#e8e4f0', 8); });
