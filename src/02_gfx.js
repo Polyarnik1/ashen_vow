@@ -187,6 +187,8 @@ function drawHumanoid(o, dir, frame) {
     const ty = 11 + by;
     if (o.robe) { R(g, 4, ty, 9, 11 - sm + (bob ? 0 : 1), body); R(g, 4, ty, 2, 11 - sm, bodyD); R(g, 4, 21 + bob, 9, 1, bodyD); if (step) R(g, 7 + step, 19 + bob, 2, 2, bodyD); }
     else { R(g, 4, ty, 9, 7 - sm, body); R(g, 4, ty, 2, 7 - sm, bodyD); R(g, 10, ty, 2, 2, bodyL); }
+    if (o.skirt && o.robe) { R(g, 3, 19 + bob, 11, 3, body); R(g, 3, 19 + bob, 2, 3, bodyD); R(g, 3, 21 + bob, 11, 1, bodyD); R(g, 6, ty + 4, 5, 1, bodyD); }
+    if (o.shawl) { R(g, 3, ty, 11, 3, o.shawl); R(g, 3, ty, 2, 3, shade(o.shawl, -0.25)); if (dir === 3) R(g, 3, ty, 11, 6, o.shawl); else R(g, 7, ty + 3, 3, 3, shade(o.shawl, -0.15)); }
     if (o.armor) { R(g, 5, ty + 1, 7, 1, bodyL); R(g, 8, ty + 2, 1, 3, bodyD); if (!side) { R(g, 3, ty, 3, 2, bodyL); R(g, 11, ty, 3, 2, bodyL); } }
     if (o.belt) R(g, 4, ty + 5 - sm, 9, 1, o.belt);
     if (o.apron) { R(g, 5, ty + 1, 7, 8 - sm, o.apron); }
@@ -197,10 +199,11 @@ function drawHumanoid(o, dir, frame) {
     if (side) { R(g, 7 - as, ty + 1, 3, 6, shade(arm, -0.1)); R(g, 7 - as, ty + 6, 3, 2, o.glove || skin); }
     else { R(g, 2, ty + 1 + as, 2, 6, arm); R(g, 13, ty + 1 - as, 2, 6, arm); R(g, 2, ty + 6 + as, 2, 2, o.glove || skin); R(g, 13, ty + 6 - as, 2, 2, o.glove || skin); }
     if (o.weapon && dir !== 3) { if (side) { R(g, 9 - as, ty - 2, 1, 10, '#c9ccd8'); R(g, 8 - as, ty + 5, 3, 1, '#8a6a3a'); } else R(g, 14, ty - 3 - as, 1, 10, o.weapon); }
+    if (o.cane && dir !== 3) { if (side) R(g, 11 - as, ty + 3, 1, 12 - sm, '#7a5a34'); else { R(g, 14, ty + 2 + as, 1, 13, '#7a5a34'); R(g, 13, ty + 2 + as, 2, 1, '#9a7a4a'); } }
     // cape front when up
     if (o.cape && dir === 3) { R(g, 3, ty, 11, 10 - sm, o.cape); R(g, 3, ty, 1, 10 - sm, shade(o.cape, -0.3)); R(g, 8, ty + 3, 1, 6, shade(o.cape, -0.25)); R(g, 4 + (frame % 2), ty + 9 - sm, 2, 1, shade(o.cape, -0.3)); }
     // head
-    const hy = 2 + by;
+    const hy = 2 + by + (o.stoop ? 1 : 0);
     const hair = o.hair || '#3a2a1e', hairD = shade(hair, -0.3);
     const hs = o.head || 'short';
     if (hs === 'helmet' || hs === 'phelm') {
@@ -216,7 +219,11 @@ function drawHumanoid(o, dir, frame) {
       R(g, 4, hy + 1, 9, 9, skin); R(g, 4, hy + 1, 2, 9, skinD);
       if (dir === 0) { const ec = o.eyes || '#1a1420'; if (o.sleep) { R(g, 6, hy + 6, 2, 1, '#1a1420'); R(g, 9, hy + 6, 2, 1, '#1a1420'); } else { R(g, 6, hy + 5, 1, 2, ec); R(g, 10, hy + 5, 1, 2, ec); } if (o.blush) { R(g, 5, hy + 7, 1, 1, '#c87a7a'); R(g, 11, hy + 7, 1, 1, '#c87a7a'); } }
       else if (side) { if (o.sleep) R(g, 10, hy + 6, 2, 1, '#1a1420'); else R(g, 11, hy + 5, 1, 2, o.eyes || '#1a1420'); R(g, 13, hy + 6, 1, 1, skinD); }
+      if (o.wrinkles && dir === 0) { R(g, 6, hy + 3, 5, 1, skinD); R(g, 5, hy + 8, 1, 2, skinD); R(g, 11, hy + 8, 1, 2, skinD); R(g, 6, hy + 4, 2, 1, '#e8e4dc'); R(g, 9, hy + 4, 2, 1, '#e8e4dc'); }
+      if (o.lips && dir === 0) R(g, 7, hy + 8, 3, 1, o.lips);
+      if (o.lashes && dir === 0) { R(g, 5, hy + 5, 1, 1, '#1a1420'); R(g, 11, hy + 5, 1, 1, '#1a1420'); }
       if (o.beard && dir !== 3) { R(g, side ? 8 : 5, hy + 7, side ? 5 : 7, 4, o.beard); R(g, side ? 9 : 6, hy + 10, side ? 3 : 5, 1, shade(o.beard, -0.2)); }
+      if (o.longbeard && dir !== 3) R(g, side ? 9 : 6, hy + 11, side ? 3 : 5, 3, o.beard);
       if (o.mustache && dir === 0) R(g, 6, hy + 7, 5, 1, o.mustache);
       if (hs === 'short' || hs === 'long' || hs === 'braids' || hs === 'bun') {
         R(g, 3, hy, 11, 4, hair); R(g, 3, hy, 2, 7, hair); R(g, 12, hy, 2, 5, hair); R(g, 5, hy, 5, 1, shade(hair, 0.2));
@@ -225,6 +232,7 @@ function drawHumanoid(o, dir, frame) {
         if (hs === 'long') { R(g, 3, hy + 4, 2, 9, hair); R(g, 12, hy + 4, 2, 9, hair); if (dir === 3) R(g, 4, hy + 8, 9, 5, hairD); }
         if (hs === 'braids') { R(g, 2, hy + 6, 2, 6, hair); R(g, 13, hy + 6, 2, 6, hair); R(g, 2, hy + 11, 2, 1, '#a04050'); R(g, 13, hy + 11, 2, 1, '#a04050'); }
         if (hs === 'bun') { R(g, 6, hy - 2, 5, 3, hair); }
+        if (o.veil) { const vc = o.veil; R(g, 3, hy - 1, 11, 3, vc); R(g, 2, hy + 2, 3, 12, vc); R(g, 12, hy + 2, 3, 12, vc); R(g, 2, hy + 2, 1, 12, shade(vc, -0.3)); if (dir === 3) R(g, 3, hy, 11, 13, vc); if (side) R(g, 3, hy, 6, 12, vc); }
       } else if (hs === 'hood') {
         const hc = o.hood || body;
         R(g, 3, hy - 1, 11, 4, hc); R(g, 2, hy + 1, 3, 10, hc); R(g, 12, hy + 1, 3, 10, hc); R(g, 2, hy + 1, 1, 10, shade(hc, -0.3));
@@ -232,7 +240,7 @@ function drawHumanoid(o, dir, frame) {
         if (side) { R(g, 2, hy, 7, 11, hc); }
       } else if (hs === 'cap') {
         R(g, 3, hy, 11, 3, o.hat || '#4a3a2a'); R(g, 1, hy + 3, 15, 1, shade(o.hat || '#4a3a2a', -0.3)); if (dir === 3) R(g, 3, hy + 1, 11, 7, hair);
-      } else if (hs === 'bald') { R(g, 5, hy + 1, 3, 1, shade(skin, 0.25)); if (dir === 3) R(g, 4, hy + 1, 9, 9, skinD); }
+      } else if (hs === 'bald') { if (o.tufts) { R(g, 3, hy + 3, 2, 6, o.tufts); R(g, 12, hy + 3, 2, 6, o.tufts); R(g, 4, hy + 2, 3, 2, o.tufts); R(g, 10, hy + 2, 3, 2, o.tufts); } R(g, 5, hy + 1, 3, 1, shade(skin, 0.25)); if (dir === 3) R(g, 4, hy + 1, 9, 9, skinD); }
       else if (hs === 'crown') {
         R(g, 3, hy, 11, 3, '#8a8a96'); for (let i = 0; i < 4; i++) R(g, 3 + i * 3, hy - 2, 2, 2, '#8a8a96'); R(g, 7, hy + 1, 2, 1, '#9fd0ff');
         if (dir === 3) R(g, 4, hy + 3, 9, 7, '#d0d0d0');
@@ -253,8 +261,8 @@ const CHARDEF = {
   lina: { head: 'braids', hair: '#a0642a', body: '#6a3a4a', robe: true, skin: '#e2bea2', small: true, blush: true },
   hosk: { head: 'helmet', steel: '#7a7e8a', body: '#5a4a3a', armor: true, legs: '#3a3030', weapon: '#9a9aa8', tabard: '#3a4a6a' },
   villagerA: { head: 'short', hair: '#4a3420', body: '#4a5a4a', belt: '#2a2010', legs: '#2a2a2a' },
-  villagerB: { head: 'long', hair: '#2a1e18', body: '#5a4a6a', robe: true, skin: '#d6b296' },
-  villagerC: { head: 'hood', hood: '#3a4a3a', body: '#3a4a3a', robe: true, skin: '#c8a88a', beard: '#8a8a8a' },
+  villagerB: { head: 'long', hair: '#2a1e18', body: '#2c2634', robe: true, skirt: true, shawl: '#5a4a6a', veil: '#1e1a26', lips: '#a85a62', lashes: true, skin: '#e4c8b2' },
+  villagerC: { head: 'bald', tufts: '#e4e0da', body: '#5a5348', robe: true, skin: '#c4a284', beard: '#e4e0da', longbeard: true, wrinkles: true, stoop: true, cane: true, belt: '#3a3026', hair: '#e4e0da' },
   villagerD: { head: 'short', hair: '#8a6a3a', body: '#6a5a3a', belt: '#3a2a1a', legs: '#3a3428', skin: '#dcb898' },
   tomas: { head: 'short', hair: '#6a4a2a', body: '#6a6e80', armor: true, legs: '#3a3a48', tabard: '#3a4a7a', weapon: '#9a9aa8', skin: '#d8b898' },
   tomasU: { head: 'short', hair: '#4a4038', body: '#4a4e5a', armor: true, legs: '#2a2a34', tabard: '#2a3048', weapon: '#7a7a88', skin: '#8fa894', eyes: '#9fffd0' },
@@ -457,6 +465,9 @@ function drawPortrait(o, mood = 0) {
     else R(g, 21, 29, 7, 1, '#6a3a3a');
     if (o.beard) { poly(g, [12, 22, 36, 22, 34, 34, 28, 42, 20, 42, 14, 34], o.beard); R(g, 21, 29, 7, 2, '#3a2020'); poly(g, [18, 30, 30, 30, 28, 40, 20, 40], shade(o.beard, 0.15)); }
     if (o.mustache) { R(g, 18, 27, 13, 2, o.mustache); R(g, 16, 28, 3, 2, o.mustache); R(g, 30, 28, 3, 2, o.mustache); }
+    if (o.lips) { R(g, 21, 29, 7, 2, o.lips); R(g, 22, 29, 5, 1, shade(o.lips, 0.2)); }
+    if (o.lashes) { R(g, 16, 19, 2, 2, '#1a1420'); R(g, 31, 19, 2, 2, '#1a1420'); R(g, 17, 22, 5, 1, '#3a2428'); R(g, 27, 22, 5, 1, '#3a2428'); }
+    if (o.wrinkles) { R(g, 16, 13, 16, 1, skinD); R(g, 18, 15, 12, 1, skinD); R(g, 13, 26, 1, 4, skinD); R(g, 35, 26, 1, 4, skinD); R(g, 15, 24, 3, 1, skinD); R(g, 30, 24, 3, 1, skinD); }
     if (o.scar) { line(g, 30, 14, 34, 28, '#8a4a4a', 1); }
     // hair / headwear
     const hair = o.hair || '#3a2a1e', hairD = shade(hair, -0.3);
@@ -473,6 +484,7 @@ function drawPortrait(o, mood = 0) {
       }
       default: ell(g, 24, 9, 13, 7, hair); R(g, 11, 9, 5, 10, hair); R(g, 32, 9, 5, 10, hair); poly(g, [14, 8, 30, 8, 22, 14], hair); R(g, 18, 5, 10, 1, shade(hair, 0.2));
     }
+    if (o.veil) { const vc = o.veil; poly(g, [24, 0, 6, 14, 4, 46, 12, 46, 13, 20, 24, 8, 35, 20, 36, 46, 44, 46, 42, 14], vc); poly(g, [24, 0, 6, 14, 4, 46, 12, 46, 13, 20, 24, 8], shade(vc, -0.25)); R(g, 14, 14, 20, 2, vc); }
   }));
 }
 const PORTDEF = {
@@ -485,6 +497,8 @@ const PORTDEF = {
   lina: { hs: 'braids', hair: '#a0642a', body: '#6a3a4a', skin: '#e2bea2' },
   hosk: { kind: 'helmet', steel: '#7a7e8a', body: '#3a4a6a', armor: true },
   villager: { hs: 'short', hair: '#4a3420', body: '#4a5a4a', skin: '#d6b296' },
+  widow: { hs: 'long', hair: '#241a1c', veil: '#1e1a26', body: '#2c2634', skin: '#e4c8b2', lips: '#a85a62', lashes: true },
+  elder: { hs: 'bald', hair: '#e8e4de', body: '#5a5348', skin: '#c4a284', beard: '#e8e4de', wrinkles: true },
   tomas: { hs: 'short', hair: '#6a4a2a', body: '#3a4a7a', skin: '#d8b898', armor: true },
   tomasU: { hs: 'short', hair: '#4a4038', body: '#2a3048', skin: '#8fa894', eyes: '#9fffd0', glow: true, gaunt: true, armor: true },
   gareth: { kind: 'phelm', steel: '#c8b27a', eyes: '#ffd27a', armor: true, body: '#8a7a50', cape: '#e8e0d0' },

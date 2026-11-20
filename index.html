@@ -632,6 +632,8 @@ function drawHumanoid(o, dir, frame) {
     const ty = 11 + by;
     if (o.robe) { R(g, 4, ty, 9, 11 - sm + (bob ? 0 : 1), body); R(g, 4, ty, 2, 11 - sm, bodyD); R(g, 4, 21 + bob, 9, 1, bodyD); if (step) R(g, 7 + step, 19 + bob, 2, 2, bodyD); }
     else { R(g, 4, ty, 9, 7 - sm, body); R(g, 4, ty, 2, 7 - sm, bodyD); R(g, 10, ty, 2, 2, bodyL); }
+    if (o.skirt && o.robe) { R(g, 3, 19 + bob, 11, 3, body); R(g, 3, 19 + bob, 2, 3, bodyD); R(g, 3, 21 + bob, 11, 1, bodyD); R(g, 6, ty + 4, 5, 1, bodyD); }
+    if (o.shawl) { R(g, 3, ty, 11, 3, o.shawl); R(g, 3, ty, 2, 3, shade(o.shawl, -0.25)); if (dir === 3) R(g, 3, ty, 11, 6, o.shawl); else R(g, 7, ty + 3, 3, 3, shade(o.shawl, -0.15)); }
     if (o.armor) { R(g, 5, ty + 1, 7, 1, bodyL); R(g, 8, ty + 2, 1, 3, bodyD); if (!side) { R(g, 3, ty, 3, 2, bodyL); R(g, 11, ty, 3, 2, bodyL); } }
     if (o.belt) R(g, 4, ty + 5 - sm, 9, 1, o.belt);
     if (o.apron) { R(g, 5, ty + 1, 7, 8 - sm, o.apron); }
@@ -642,10 +644,11 @@ function drawHumanoid(o, dir, frame) {
     if (side) { R(g, 7 - as, ty + 1, 3, 6, shade(arm, -0.1)); R(g, 7 - as, ty + 6, 3, 2, o.glove || skin); }
     else { R(g, 2, ty + 1 + as, 2, 6, arm); R(g, 13, ty + 1 - as, 2, 6, arm); R(g, 2, ty + 6 + as, 2, 2, o.glove || skin); R(g, 13, ty + 6 - as, 2, 2, o.glove || skin); }
     if (o.weapon && dir !== 3) { if (side) { R(g, 9 - as, ty - 2, 1, 10, '#c9ccd8'); R(g, 8 - as, ty + 5, 3, 1, '#8a6a3a'); } else R(g, 14, ty - 3 - as, 1, 10, o.weapon); }
+    if (o.cane && dir !== 3) { if (side) R(g, 11 - as, ty + 3, 1, 12 - sm, '#7a5a34'); else { R(g, 14, ty + 2 + as, 1, 13, '#7a5a34'); R(g, 13, ty + 2 + as, 2, 1, '#9a7a4a'); } }
     // cape front when up
     if (o.cape && dir === 3) { R(g, 3, ty, 11, 10 - sm, o.cape); R(g, 3, ty, 1, 10 - sm, shade(o.cape, -0.3)); R(g, 8, ty + 3, 1, 6, shade(o.cape, -0.25)); R(g, 4 + (frame % 2), ty + 9 - sm, 2, 1, shade(o.cape, -0.3)); }
     // head
-    const hy = 2 + by;
+    const hy = 2 + by + (o.stoop ? 1 : 0);
     const hair = o.hair || '#3a2a1e', hairD = shade(hair, -0.3);
     const hs = o.head || 'short';
     if (hs === 'helmet' || hs === 'phelm') {
@@ -661,7 +664,11 @@ function drawHumanoid(o, dir, frame) {
       R(g, 4, hy + 1, 9, 9, skin); R(g, 4, hy + 1, 2, 9, skinD);
       if (dir === 0) { const ec = o.eyes || '#1a1420'; if (o.sleep) { R(g, 6, hy + 6, 2, 1, '#1a1420'); R(g, 9, hy + 6, 2, 1, '#1a1420'); } else { R(g, 6, hy + 5, 1, 2, ec); R(g, 10, hy + 5, 1, 2, ec); } if (o.blush) { R(g, 5, hy + 7, 1, 1, '#c87a7a'); R(g, 11, hy + 7, 1, 1, '#c87a7a'); } }
       else if (side) { if (o.sleep) R(g, 10, hy + 6, 2, 1, '#1a1420'); else R(g, 11, hy + 5, 1, 2, o.eyes || '#1a1420'); R(g, 13, hy + 6, 1, 1, skinD); }
+      if (o.wrinkles && dir === 0) { R(g, 6, hy + 3, 5, 1, skinD); R(g, 5, hy + 8, 1, 2, skinD); R(g, 11, hy + 8, 1, 2, skinD); R(g, 6, hy + 4, 2, 1, '#e8e4dc'); R(g, 9, hy + 4, 2, 1, '#e8e4dc'); }
+      if (o.lips && dir === 0) R(g, 7, hy + 8, 3, 1, o.lips);
+      if (o.lashes && dir === 0) { R(g, 5, hy + 5, 1, 1, '#1a1420'); R(g, 11, hy + 5, 1, 1, '#1a1420'); }
       if (o.beard && dir !== 3) { R(g, side ? 8 : 5, hy + 7, side ? 5 : 7, 4, o.beard); R(g, side ? 9 : 6, hy + 10, side ? 3 : 5, 1, shade(o.beard, -0.2)); }
+      if (o.longbeard && dir !== 3) R(g, side ? 9 : 6, hy + 11, side ? 3 : 5, 3, o.beard);
       if (o.mustache && dir === 0) R(g, 6, hy + 7, 5, 1, o.mustache);
       if (hs === 'short' || hs === 'long' || hs === 'braids' || hs === 'bun') {
         R(g, 3, hy, 11, 4, hair); R(g, 3, hy, 2, 7, hair); R(g, 12, hy, 2, 5, hair); R(g, 5, hy, 5, 1, shade(hair, 0.2));
@@ -670,6 +677,7 @@ function drawHumanoid(o, dir, frame) {
         if (hs === 'long') { R(g, 3, hy + 4, 2, 9, hair); R(g, 12, hy + 4, 2, 9, hair); if (dir === 3) R(g, 4, hy + 8, 9, 5, hairD); }
         if (hs === 'braids') { R(g, 2, hy + 6, 2, 6, hair); R(g, 13, hy + 6, 2, 6, hair); R(g, 2, hy + 11, 2, 1, '#a04050'); R(g, 13, hy + 11, 2, 1, '#a04050'); }
         if (hs === 'bun') { R(g, 6, hy - 2, 5, 3, hair); }
+        if (o.veil) { const vc = o.veil; R(g, 3, hy - 1, 11, 3, vc); R(g, 2, hy + 2, 3, 12, vc); R(g, 12, hy + 2, 3, 12, vc); R(g, 2, hy + 2, 1, 12, shade(vc, -0.3)); if (dir === 3) R(g, 3, hy, 11, 13, vc); if (side) R(g, 3, hy, 6, 12, vc); }
       } else if (hs === 'hood') {
         const hc = o.hood || body;
         R(g, 3, hy - 1, 11, 4, hc); R(g, 2, hy + 1, 3, 10, hc); R(g, 12, hy + 1, 3, 10, hc); R(g, 2, hy + 1, 1, 10, shade(hc, -0.3));
@@ -677,7 +685,7 @@ function drawHumanoid(o, dir, frame) {
         if (side) { R(g, 2, hy, 7, 11, hc); }
       } else if (hs === 'cap') {
         R(g, 3, hy, 11, 3, o.hat || '#4a3a2a'); R(g, 1, hy + 3, 15, 1, shade(o.hat || '#4a3a2a', -0.3)); if (dir === 3) R(g, 3, hy + 1, 11, 7, hair);
-      } else if (hs === 'bald') { R(g, 5, hy + 1, 3, 1, shade(skin, 0.25)); if (dir === 3) R(g, 4, hy + 1, 9, 9, skinD); }
+      } else if (hs === 'bald') { if (o.tufts) { R(g, 3, hy + 3, 2, 6, o.tufts); R(g, 12, hy + 3, 2, 6, o.tufts); R(g, 4, hy + 2, 3, 2, o.tufts); R(g, 10, hy + 2, 3, 2, o.tufts); } R(g, 5, hy + 1, 3, 1, shade(skin, 0.25)); if (dir === 3) R(g, 4, hy + 1, 9, 9, skinD); }
       else if (hs === 'crown') {
         R(g, 3, hy, 11, 3, '#8a8a96'); for (let i = 0; i < 4; i++) R(g, 3 + i * 3, hy - 2, 2, 2, '#8a8a96'); R(g, 7, hy + 1, 2, 1, '#9fd0ff');
         if (dir === 3) R(g, 4, hy + 3, 9, 7, '#d0d0d0');
@@ -698,8 +706,8 @@ const CHARDEF = {
   lina: { head: 'braids', hair: '#a0642a', body: '#6a3a4a', robe: true, skin: '#e2bea2', small: true, blush: true },
   hosk: { head: 'helmet', steel: '#7a7e8a', body: '#5a4a3a', armor: true, legs: '#3a3030', weapon: '#9a9aa8', tabard: '#3a4a6a' },
   villagerA: { head: 'short', hair: '#4a3420', body: '#4a5a4a', belt: '#2a2010', legs: '#2a2a2a' },
-  villagerB: { head: 'long', hair: '#2a1e18', body: '#5a4a6a', robe: true, skin: '#d6b296' },
-  villagerC: { head: 'hood', hood: '#3a4a3a', body: '#3a4a3a', robe: true, skin: '#c8a88a', beard: '#8a8a8a' },
+  villagerB: { head: 'long', hair: '#2a1e18', body: '#2c2634', robe: true, skirt: true, shawl: '#5a4a6a', veil: '#1e1a26', lips: '#a85a62', lashes: true, skin: '#e4c8b2' },
+  villagerC: { head: 'bald', tufts: '#e4e0da', body: '#5a5348', robe: true, skin: '#c4a284', beard: '#e4e0da', longbeard: true, wrinkles: true, stoop: true, cane: true, belt: '#3a3026', hair: '#e4e0da' },
   villagerD: { head: 'short', hair: '#8a6a3a', body: '#6a5a3a', belt: '#3a2a1a', legs: '#3a3428', skin: '#dcb898' },
   tomas: { head: 'short', hair: '#6a4a2a', body: '#6a6e80', armor: true, legs: '#3a3a48', tabard: '#3a4a7a', weapon: '#9a9aa8', skin: '#d8b898' },
   tomasU: { head: 'short', hair: '#4a4038', body: '#4a4e5a', armor: true, legs: '#2a2a34', tabard: '#2a3048', weapon: '#7a7a88', skin: '#8fa894', eyes: '#9fffd0' },
@@ -902,6 +910,9 @@ function drawPortrait(o, mood = 0) {
     else R(g, 21, 29, 7, 1, '#6a3a3a');
     if (o.beard) { poly(g, [12, 22, 36, 22, 34, 34, 28, 42, 20, 42, 14, 34], o.beard); R(g, 21, 29, 7, 2, '#3a2020'); poly(g, [18, 30, 30, 30, 28, 40, 20, 40], shade(o.beard, 0.15)); }
     if (o.mustache) { R(g, 18, 27, 13, 2, o.mustache); R(g, 16, 28, 3, 2, o.mustache); R(g, 30, 28, 3, 2, o.mustache); }
+    if (o.lips) { R(g, 21, 29, 7, 2, o.lips); R(g, 22, 29, 5, 1, shade(o.lips, 0.2)); }
+    if (o.lashes) { R(g, 16, 19, 2, 2, '#1a1420'); R(g, 31, 19, 2, 2, '#1a1420'); R(g, 17, 22, 5, 1, '#3a2428'); R(g, 27, 22, 5, 1, '#3a2428'); }
+    if (o.wrinkles) { R(g, 16, 13, 16, 1, skinD); R(g, 18, 15, 12, 1, skinD); R(g, 13, 26, 1, 4, skinD); R(g, 35, 26, 1, 4, skinD); R(g, 15, 24, 3, 1, skinD); R(g, 30, 24, 3, 1, skinD); }
     if (o.scar) { line(g, 30, 14, 34, 28, '#8a4a4a', 1); }
     // hair / headwear
     const hair = o.hair || '#3a2a1e', hairD = shade(hair, -0.3);
@@ -918,6 +929,7 @@ function drawPortrait(o, mood = 0) {
       }
       default: ell(g, 24, 9, 13, 7, hair); R(g, 11, 9, 5, 10, hair); R(g, 32, 9, 5, 10, hair); poly(g, [14, 8, 30, 8, 22, 14], hair); R(g, 18, 5, 10, 1, shade(hair, 0.2));
     }
+    if (o.veil) { const vc = o.veil; poly(g, [24, 0, 6, 14, 4, 46, 12, 46, 13, 20, 24, 8, 35, 20, 36, 46, 44, 46, 42, 14], vc); poly(g, [24, 0, 6, 14, 4, 46, 12, 46, 13, 20, 24, 8], shade(vc, -0.25)); R(g, 14, 14, 20, 2, vc); }
   }));
 }
 const PORTDEF = {
@@ -930,6 +942,8 @@ const PORTDEF = {
   lina: { hs: 'braids', hair: '#a0642a', body: '#6a3a4a', skin: '#e2bea2' },
   hosk: { kind: 'helmet', steel: '#7a7e8a', body: '#3a4a6a', armor: true },
   villager: { hs: 'short', hair: '#4a3420', body: '#4a5a4a', skin: '#d6b296' },
+  widow: { hs: 'long', hair: '#241a1c', veil: '#1e1a26', body: '#2c2634', skin: '#e4c8b2', lips: '#a85a62', lashes: true },
+  elder: { hs: 'bald', hair: '#e8e4de', body: '#5a5348', skin: '#c4a284', beard: '#e8e4de', wrinkles: true },
   tomas: { hs: 'short', hair: '#6a4a2a', body: '#3a4a7a', skin: '#d8b898', armor: true },
   tomasU: { hs: 'short', hair: '#4a4038', body: '#2a3048', skin: '#8fa894', eyes: '#9fffd0', glow: true, gaunt: true, armor: true },
   gareth: { kind: 'phelm', steel: '#c8b27a', eyes: '#ffd27a', armor: true, body: '#8a7a50', cape: '#e8e0d0' },
@@ -2688,8 +2702,8 @@ const PATS = {
   // ---- forest / chapel ----
   embers: pw => ({ dur: 6, w: 92, h: 84, u(P) { P.ev('a', 0.17 / pw, () => bul({ x: P.x + rnd(P.w), y: P.y - 4, vx: rnd(-10, 10), vy: rnd(38, 58), type: 'ember', r: 2.4, wob: rnd(6), upd: (b, dt) => { b.x += Math.sin(b.t * 4 + b.wob) * 22 * dt; } })); } }),
   ratHop: pw => ({ dur: 6.5, w: 100, h: 80, u(P) { P.ev('a', 0.5 / pw, () => { const s = Math.random() < 0.5 ? -1 : 1; bul({ x: s < 0 ? P.x - 3 : P.x + P.w + 3, y: P.y + P.h - 6, vx: -s * rnd(35, 70), vy: rnd(-135, -90), ay: 150, r: 3.5, col: '#8a8890', core: '#ffb030' }); }); } }),
-  wispHome: pw => ({ dur: 6.5, w: 96, h: 96, u(P) { P.ev('a', 1.0 / pw, () => { const [x, y] = edgePoint(P, irnd(0, 3)); bul({ x, y, type: 'wisp', r: 3.5, col: '#5ae09a', core: '#c8ffe0', life: 5, upd: (b, dt) => { if (b.t < 2.6) { const [vx, vy] = P.aim(b.x, b.y, 38); b.vx += (vx - b.vx) * dt * 2; b.vy += (vy - b.vy) * dt * 2; } } }); }, 0.2); } }),
-  wispCircle: pw => ({ dur: 7, w: 96, h: 96, u(P) { P.ev('a', 2.3, () => { const n = 14, gap = irnd(0, n - 1), cx = P.soul.x, cy = P.soul.y; for (let i = 0; i < n; i++) { if (i === gap || i === (gap + 1) % n || (pw < 0.9 && i === (gap + 2) % n)) continue; const a = i / n * 6.283; bul({ x: cx + Math.cos(a) * 62, y: cy + Math.sin(a) * 62, vx: -Math.cos(a) * 32, vy: -Math.sin(a) * 32, type: 'wisp', r: 3, col: '#5ae09a', life: 4.5, warn: 0.4, wcol: '#5ae09a' }); } }, 0.1); } }),
+  wispHome: pw => ({ dur: 6.5, w: 96, h: 96, u(P) { P.ev('a', 1.15 / pw, () => { const [x, y] = edgePoint(P, irnd(0, 3)); const ox = rnd(-34, 34), oy = rnd(-34, 34), sp = rnd(30, 40); bul({ x, y, type: 'wisp', r: 3.5, col: '#5ae09a', core: '#c8ffe0', life: 5, upd: (b, dt) => { if (b.t < 1.8) { const dx = P.soul.x + ox - b.x, dy = P.soul.y + oy - b.y, l = Math.hypot(dx, dy) || 1; b.vx += (dx / l * sp - b.vx) * dt * 1.4; b.vy += (dy / l * sp - b.vy) * dt * 1.4; } } }); }, 0.2); } }),
+  wispCircle: pw => ({ dur: 7, w: 96, h: 96, u(P) { P.ev('a', 2.3, () => { const n = 12, gap = irnd(0, n - 1), cx = P.soul.x, cy = P.soul.y; for (let i = 0; i < n; i++) { if (i === gap || i === (gap + 1) % n || i === (gap + 2) % n || (pw < 0.9 && i === (gap + 3) % n)) continue; const a = i / n * 6.283; bul({ x: cx + Math.cos(a) * 62, y: cy + Math.sin(a) * 62, vx: -Math.cos(a) * 26 + rnd(-9, 9), vy: -Math.sin(a) * 26 + rnd(-9, 9), type: 'wisp', r: 3, col: '#5ae09a', life: 4.5, warn: 0.6, wcol: '#5ae09a' }); } }, 0.1); } }),
   wolfDash: pw => ({ dur: 6.5, w: 120, h: 80, u(P) { P.ev('a', 0.85 / pw, () => { const horiz = Math.random() < 0.65; if (horiz) { const y = clamp(P.soul.y + rnd(-14, 14), P.y + 4, P.y + P.h - 14); warnBeam({ x: P.x, y, w: P.w, h: 10, col: '#c8d8ff', onAct: () => sfx('slash', { vol: 0.4 }) }); } else { const x = clamp(P.soul.x + rnd(-14, 14), P.x + 4, P.x + P.w - 14); warnBeam({ x, y: P.y, w: 10, h: P.h, col: '#c8d8ff', onAct: () => sfx('slash', { vol: 0.4 }) }); } }, 0.2); } }),
   fogBite: pw => ({ dur: 6, w: 96, h: 90, u(P) { P.ev('a', 0.42 / pw, () => { let x, y, k = 0; do { x = P.x + rnd(8, P.w - 8); y = P.y + rnd(8, P.h - 8); k++; } while (dist(x, y, P.soul.x, P.soul.y) < 30 && k < 10); bul({ x, y, r: 3, col: '#9aaac0', core: '#ff3a3a', warn: 0.6, wcol: '#9aaac0', onAct: b => { const [vx, vy] = P.aim(b.x, b.y, 105); b.vx = vx; b.vy = vy; } }); }); } }),
   spores: pw => ({ dur: 6, w: 92, h: 88, u(P) { P.ev('a', 0.16 / pw, () => bul({ x: P.x + rnd(P.w), y: P.y + P.h + 4, vy: -rnd(30, 44), type: 'spore', r: 2.5, col: '#c8e870', core: '#f4ffc0', wob: rnd(6), upd: (b, dt) => { b.x += Math.sin(b.t * 3 + b.wob) * 26 * dt; } })); } }),
@@ -2699,13 +2713,13 @@ const PATS = {
   shieldSweep: pw => ({ dur: 7, w: 110, h: 90, u(P) { P.ev('a', 1.45 / pw, () => { const dir = Math.random() < 0.5 ? 1 : -1; const gy = rnd(P.y + 18, P.y + P.h - 18); for (let y = P.y + 3; y < P.y + P.h; y += 7) { if (Math.abs(y - gy) < 13) continue; bul({ x: dir > 0 ? P.x - 4 : P.x + P.w + 4, y, vx: dir * 52, r: 3, col: '#a8784a', core: '#ffcf8a', life: 4 }); } }, 0.1); } }),
   stoneShards: pw => ({ dur: 6, w: 100, h: 90, u(P) { P.ev('a', 0.38 / pw, () => { const c = irnd(0, 3); const x = c % 2 ? P.x + P.w + 4 : P.x - 4, y = c > 1 ? P.y + P.h + 4 : P.y - 4; const [vx, vy] = P.aim(x, y, 78); const a = Math.atan2(vy, vx) + rnd(-0.2, 0.2); bul({ x, y, vx: Math.cos(a) * 78, vy: Math.sin(a) * 78, type: 'shard', r: 3, col: '#9a9cac' }); }); } }),
   diveWings: pw => ({ dur: 6.5, w: 110, h: 90, u(P) { P.ev('a', 0.9 / pw, () => { const tx = P.soul.x; for (let i = -2; i <= 2; i++) bul({ x: tx + i * 9, y: P.y - 6 - Math.abs(i) * 8, vy: 85, r: 3, type: 'shard', col: '#7a7c8c', life: 3 }); sfx('wing', { vol: 0.4 }); }); } }),
-  bellRings: pw => ({ dur: 7, w: 100, h: 100, u(P) { P.ev('a', 1.05 / pw, () => { bul({ type: 'ring', x: P.cx + rnd(-20, 20), y: P.cy + rnd(-20, 20), rad: 2, grow: 46, th: 4, col: '#c8c8f0', gap: rnd(6.28), gapW: 0.95, parry: false, pierce: true, life: 4 }); sfx('chime', { vol: 0.25, rate: rnd(0.8, 1.2) }); }, 0.1); } }),
+  bellRings: pw => ({ dur: 7, w: 100, h: 100, u(P) { P.ev('a', 1.5 / pw, () => { let rx, ry, k = 0; do { rx = P.cx + rnd(-24, 24); ry = P.cy + rnd(-24, 24); k++; } while (dist(rx, ry, P.soul.x, P.soul.y) < 16 && k < 12); bul({ type: 'ring', x: rx, y: ry, rad: 2, grow: 36, th: 4, col: '#c8c8f0', gap: Math.atan2(P.soul.y - ry, P.soul.x - rx) + rnd(-0.75, 0.75), gapW: 1.9, parry: false, pierce: true, life: 4 }); sfx('chime', { vol: 0.25, rate: rnd(0.8, 1.2) }); }, 0.1); } }),
   chimeRain: pw => ({ dur: 6, w: 96, h: 88, u(P) { P.ev('a', 0.22 / pw, () => bul({ x: P.x + rnd(P.w), y: P.y - 4, vy: rnd(30, 45), type: 'note', r: 3, col: '#c8d8ff', wob: rnd(6), x0: 0, upd: (b, dt) => { b.vx = Math.sin(b.t * 3 + b.wob) * 30; } })); } }),
   // bishop
   candleWall: pw => ({ dur: 7, w: 110, h: 96, u(P) { P.ev('a', 1.0 / pw, () => { const gx = rnd(P.x + 18, P.x + P.w - 18); for (let x = P.x + 4; x < P.x + P.w; x += 8) { if (Math.abs(x - gx) < 13) continue; bul({ x, y: P.y + P.h + 6, vy: -46, type: 'flame', r: 3, life: 4 }); } sfx('fire', { vol: 0.3 }); }, 0.1); } }),
   censerSpin: pw => ({ start: [0.5, 0.85], dur: 7, w: 110, h: 100, init(P) { this.a = 0; }, u(P, dt) { this.a += dt * 1.6; P.ev('a', 0.11 / pw, () => { for (let k = 0; k < 3; k++) { const a = this.a + k * 2.094; bul({ x: P.cx, y: P.cy, vx: Math.cos(a) * 55, vy: Math.sin(a) * 55, r: 2.8, col: '#ff8a2a', core: '#ffe0a0' }); } }, 0.4); bul0(P); } }),
   rustCross: pw => ({ dur: 7, w: 110, h: 100, u(P) { P.ev('a', 1.2 / pw, () => { const x = P.soul.x, y = P.soul.y; warnBeam({ x: P.x, y: y - 5, w: P.w, h: 10, col: '#ff8a3a', wcol: '#ff8a3a', warn: 0.7, onAct: () => sfx('boom', { vol: 0.25 }) }); warnBeam({ x: x - 5, y: P.y, w: 10, h: P.h, col: '#ff8a3a', wcol: '#ff8a3a', warn: 0.7 }); }, 0.2); P.ev('b', 0.5, () => bul({ x: P.x + rnd(P.w), y: P.y - 4, vy: 50, type: 'ember', r: 2.2 })); } }),
-  bellToll: pw => ({ dur: 7, w: 110, h: 100, u(P) { P.ev('a', 0.9 / pw, () => { const c = irnd(0, 3); bul({ type: 'ring', x: c % 2 ? P.x + P.w : P.x, y: c > 1 ? P.y + P.h : P.y, rad: 2, grow: 55, th: 5, col: '#d8a85a', gap: 0, gapW: 0, parry: false, pierce: true, life: 4, upd: function (b) { } }); sfx('bigbell', { vol: 0.2, rate: 1.4 }); }); P.ev('b', 0.35 / pw, () => bul({ x: P.x + rnd(P.w), y: P.y - 4, vy: 55, type: 'flame', r: 3 })); } }),
+  bellToll: pw => ({ dur: 7, w: 110, h: 100, u(P) { P.ev('a', 1.5 / pw, () => { const c = irnd(0, 3); const rx = c % 2 ? P.x + P.w : P.x, ry = c > 1 ? P.y + P.h : P.y; bul({ type: 'ring', x: rx, y: ry, rad: 2, grow: 42, th: 5, col: '#d8a85a', gap: Math.atan2(P.soul.y - ry, P.soul.x - rx) + rnd(-0.5, 0.5), gapW: 1.5, parry: false, pierce: true, life: 4 }); sfx('bigbell', { vol: 0.2, rate: 1.4 }); }); P.ev('b', 0.35 / pw, () => bul({ x: P.x + rnd(P.w), y: P.y - 4, vy: 55, type: 'flame', r: 3 })); } }),
   // ---- crypt ----
   boneArc: pw => ({ dur: 6.5, w: 110, h: 90, u(P) { P.ev('a', 0.36 / pw, () => { const s = Math.random() < 0.7 ? 1 : -1; bul({ x: s > 0 ? P.x + P.w + 4 : P.x - 4, y: P.y + rnd(10, P.h * 0.6), vx: -s * rnd(40, 75), vy: rnd(-70, -20), ay: 120, type: 'bone', len: 12, wd: 3, vr: rnd(-8, 8), rot: rnd(6) }); }); } }),
   boneWall: pw => ({ dur: 7, w: 120, h: 80, u(P) { P.ev('a', 0.75 / pw, () => { const top = Math.random() < 0.5; const hh = rnd(26, 46); bul({ x: P.x + P.w + 6, y: top ? P.y + hh / 2 : P.y + P.h - hh / 2, vx: -68, type: 'bone', len: hh, wd: 5, rot: Math.PI / 2, life: 4 }); }); } }),
@@ -3173,6 +3187,7 @@ const MAPS = {};
     { type: 'lever', id: 'lv1', x: 2, y: 12, flag: 'lv1', act: e => STORY.lever(e) },
     { type: 'lever', id: 'lv3', x: 4, y: 3, flag: 'lv3', act: e => STORY.lever(e) },
     { type: 'lever', id: 'lv2', x: 33, y: 3, flag: 'lv2', act: e => STORY.lever(e) },
+    { type: 'sign', x: 31, y: 12, text: 'Два камня — на две плиты. Тогда решётка в северо-восточном углу поднимется.' },
     { type: 'block', id: 'b1', x: 29, y: 14 }, { type: 'block', id: 'b2', x: 33, y: 16 },
     { type: 'chest', id: 'k1', x: 28, y: 3, item: 'doll' },
     { type: 'chest', id: 'k2', x: 7, y: 20, item: 'elixir' },
@@ -3189,7 +3204,7 @@ const MAPS = {};
     { type: 'trigger', id: 'sanct', x: 11, y: 7, w: 14, h: 1, once: true, cond2: () => !F('bishop_done'), run: () => STORY.bishopFight() },
   ];
   MAPS.cathedral = { name: 'Ржавый собор', base: 'stone2', alt: 'carpet', wall: 'rwall', rows: rows(g), music: 't03', amb: 'wind', dark: 0.5, darkCol: 'rgb(10,6,4)', weather: ['dust'], battleBg: 'cathedral', battleMusic: 't14', playerLight: 56, ents,
-    onPush: () => { const M = World; const on = [[29, 12], [34, 12]].every(([x, y]) => World.ents.some(e => e.type === 'block' && e.cx === x && e.cy === y)); if (on && !F('cath_plates')) { setF('cath_plates'); run(async () => { sfx('lever'); await wait(0.3); sfx('door'); shake(2); await nar('Где-то наверху со скрежетом поднимается решётка.'); }); } },
+    onPush: () => { const M = World; const on = [[29, 12], [34, 12]].every(([x, y]) => World.ents.some(e => e.type === 'block' && e.cx === x && e.cy === y)); if (on && !F('cath_plates')) { setF('cath_plates'); run(async () => { sfx('lever'); await wait(0.3); sfx('door'); shake(2); await nar('В северо-восточном углу собора со скрежетом поднимается решётка.'); await IV('Решётка поднялась! Теперь можно пройти в северо-восточную комнату — наверное, там и спрятан рычаг.'); }); } },
     look: { '17,3': async () => nar('Алтарь собора, покрытый ржавчиной. Колокольные верёвки свисают с потолка.') },
     onEnter: async () => { if (!F('cath_card')) { setF('cath_card'); areaCard('Ржавый собор'); await wait(1); await STORY.cathEnter(); } else areaCard('Ржавый собор'); } };
 })();
@@ -3506,6 +3521,10 @@ const STORY = {
     sfx('bigbell', { rate: 0.6, vol: 0.5 }); shake(2);
     await nar(`Высоко наверху колокол глухо стонет — и замолкает. (${n}/3)`);
     if (e.flag === 'lv1') { sfx('door'); await nar('Неподалёку со скрежетом поднимается решётка.'); }
+    if (n < 3) {
+      const H = { lv1: 'Один рычаг — в западном крыле, у самой стены.', lv3: 'Один рычаг — в северо-западной комнате, за решёткой, которую поднимает первый рычаг.', lv2: 'Последний рычаг — в северо-восточной комнате. Решётка там закрыта, а в восточном крыле на полу две плиты. Поставь на них каменные блоки!' };
+      await wait(0.2); await IV('Осталось ' + (3 - n === 1 ? 'ещё один.' : 'ещё два.') + ' ' + ['lv1', 'lv3', 'lv2'].filter(k => !F(k)).map(k => H[k]).join(' '), 0);
+    }
     if (n === 3) { setF('bells'); await wait(0.5); sfx('rumble'); shake(4); await nar('Собор погружается в тишину. В глубине нефа с грохотом открывается путь к алтарю.'); await IV('Тишина... Теперь он нас услышит.'); }
   },
   async bishopFight() {
@@ -3848,8 +3867,8 @@ const TALK = {
     await Ho(pick(['Проходи, рыцарь. Да хранит тебя... что там у вас хранит.', 'Собор — прямо по дороге. Не заблудишься: иди на звон.', 'Если что — кричи. Я не приду, но хоть буду знать.']));
   },
   async vA() { await say('Крестьянин', F('bishop_done') ? 'Ночью было тихо! Ни одного мертвеца! Я даже выспался, представляешь?' : 'Говорят, сто лет назад король уснул под озером. А вместе с ним — всё его королевство.', { p: 'villager' }); },
-  async vB() { await say('Вдова', F('bishop_done') ? 'Спасибо тебе. Теперь мой муж... спит спокойно. Я это чувствую.' : 'Мой муж ушёл к собору и не вернулся. Если увидишь его там... Нет. Не говори мне.', { p: 'villager' }); },
-  async vC() { await say('Старик', F('tomas_done') ? 'Трое героев: два рыцаря и жрица. Один погиб, второй сбежал, а жрица... Жрица стала луной, так говорила бабка.' : 'Орден Бледной Луны... Помню сказки бабки. Трое героев запечатали короля. Двое рыцарей и жрица.', { p: 'villager' }); },
+  async vB() { await say('Вдова', F('bishop_done') ? 'Спасибо тебе. Теперь мой муж... спит спокойно. Я это чувствую.' : 'Мой муж ушёл к собору и не вернулся. Если увидишь его там... Нет. Не говори мне.', { p: 'widow' }); },
+  async vC() { await say('Старик', F('tomas_done') ? 'Трое героев: два рыцаря и жрица. Один погиб, второй сбежал, а жрица... Жрица стала луной, так говорила бабка.' : 'Орден Бледной Луны... Помню сказки бабки. Трое героев запечатали короля. Двое рыцарей и жрица.', { p: 'elder' }); },
   async vD() { await say('Пастух', pick(['Ты не видел мою козу? Белую такую. Она уже сто лет как... ладно, неважно.', 'Кузнец Брам ворчит, но кует лучше всех в округе.', 'Не ходи к кладбищу ночью. Хотя для тебя, наверное, это как домой сходить.']), { p: 'villager' }); },
   async garethV() { await say('Гарет', pick(['Охраняю живых, брат. Иди — и вернись, если сможешь.', 'Мирра ворчит, что я слишком громко точу меч. Это хорошо. Значит, она спит.']), { p: 'gareth' }); },
   async bishop() { await STORY.bishopFight(); },

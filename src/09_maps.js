@@ -171,6 +171,7 @@ const MAPS = {};
     { type: 'lever', id: 'lv1', x: 2, y: 12, flag: 'lv1', act: e => STORY.lever(e) },
     { type: 'lever', id: 'lv3', x: 4, y: 3, flag: 'lv3', act: e => STORY.lever(e) },
     { type: 'lever', id: 'lv2', x: 33, y: 3, flag: 'lv2', act: e => STORY.lever(e) },
+    { type: 'sign', x: 31, y: 12, text: 'Два камня — на две плиты. Тогда решётка в северо-восточном углу поднимется.' },
     { type: 'block', id: 'b1', x: 29, y: 14 }, { type: 'block', id: 'b2', x: 33, y: 16 },
     { type: 'chest', id: 'k1', x: 28, y: 3, item: 'doll' },
     { type: 'chest', id: 'k2', x: 7, y: 20, item: 'elixir' },
@@ -187,7 +188,7 @@ const MAPS = {};
     { type: 'trigger', id: 'sanct', x: 11, y: 7, w: 14, h: 1, once: true, cond2: () => !F('bishop_done'), run: () => STORY.bishopFight() },
   ];
   MAPS.cathedral = { name: 'Ржавый собор', base: 'stone2', alt: 'carpet', wall: 'rwall', rows: rows(g), music: 't03', amb: 'wind', dark: 0.5, darkCol: 'rgb(10,6,4)', weather: ['dust'], battleBg: 'cathedral', battleMusic: 't14', playerLight: 56, ents,
-    onPush: () => { const M = World; const on = [[29, 12], [34, 12]].every(([x, y]) => World.ents.some(e => e.type === 'block' && e.cx === x && e.cy === y)); if (on && !F('cath_plates')) { setF('cath_plates'); run(async () => { sfx('lever'); await wait(0.3); sfx('door'); shake(2); await nar('Где-то наверху со скрежетом поднимается решётка.'); }); } },
+    onPush: () => { const M = World; const on = [[29, 12], [34, 12]].every(([x, y]) => World.ents.some(e => e.type === 'block' && e.cx === x && e.cy === y)); if (on && !F('cath_plates')) { setF('cath_plates'); run(async () => { sfx('lever'); await wait(0.3); sfx('door'); shake(2); await nar('В северо-восточном углу собора со скрежетом поднимается решётка.'); await IV('Решётка поднялась! Теперь можно пройти в северо-восточную комнату — наверное, там и спрятан рычаг.'); }); } },
     look: { '17,3': async () => nar('Алтарь собора, покрытый ржавчиной. Колокольные верёвки свисают с потолка.') },
     onEnter: async () => { if (!F('cath_card')) { setF('cath_card'); areaCard('Ржавый собор'); await wait(1); await STORY.cathEnter(); } else areaCard('Ржавый собор'); } };
 })();
