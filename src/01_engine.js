@@ -219,6 +219,9 @@ function buildSfx() {
   B('step', 0.05, [{ type: 'noise', dur: 0.045, vol: 0.18, lp: 0.15, curve: 3 }]);
   B('step2', 0.05, [{ type: 'noise', dur: 0.045, vol: 0.16, lp: 0.1, curve: 3 }]);
   B('slash', 0.28, [{ type: 'noise', dur: 0.24, vol: 0.5, lp: 0.6, hp: 0.9, curve: 2 }, { type: 'saw', f: 1400, f2: 200, dur: 0.18, vol: 0.12, lp: 0.3 }]);
+  // reeds / tall grass rustle: bright filtered noise, a couple of overlapping swishes
+  B('rustle', 0.3, [{ type: 'noise', dur: 0.11, vol: 0.26, lp: 0.7, hp: 0.82, a: 0.012, curve: 1.2 }, { type: 'noise', t0: 0.06, dur: 0.14, vol: 0.2, lp: 0.55, hp: 0.86, a: 0.02, curve: 1.6 }, { type: 'noise', t0: 0.15, dur: 0.1, vol: 0.12, lp: 0.8, hp: 0.9, a: 0.01, curve: 2 }]);
+  B('rustle2', 0.3, [{ type: 'noise', dur: 0.14, vol: 0.24, lp: 0.5, hp: 0.88, a: 0.02, curve: 1.4 }, { type: 'noise', t0: 0.08, dur: 0.12, vol: 0.2, lp: 0.75, hp: 0.8, a: 0.01, curve: 1.3 }, { type: 'noise', t0: 0.17, dur: 0.09, vol: 0.1, lp: 0.6, hp: 0.9, a: 0.01, curve: 2 }]);
   B('swing', 0.25, [{ type: 'noise', dur: 0.22, vol: 0.35, lp: 0.25, curve: 1.5 }]);
   B('hit', 0.3, [{ type: 'noise', dur: 0.12, vol: 0.6, lp: 0.5 }, { type: 'sin', f: 160, f2: 40, dur: 0.25, vol: 0.7 }, { type: 'sq', f: 220, f2: 60, dur: 0.1, vol: 0.15, lp: 0.3 }]);
   B('crit', 0.7, [{ type: 'noise', dur: 0.15, vol: 0.7, lp: 0.6 }, { type: 'sin', f: 200, f2: 40, dur: 0.3, vol: 0.8 }, ...bell([1560, 2340, 3120], 0.6, 0.2, 0.03)]);

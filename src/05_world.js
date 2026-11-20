@@ -24,7 +24,7 @@ function isSolidCell(x, y) { if (x < 0 || y < 0 || x >= World.w || y >= World.h)
 function loadMap(id) {
   const M = MAPS[id]; World.map = M; World.id = id;
   const rows = M.rows; World.h = rows.length; World.w = Math.max(...rows.map(r => r.length));
-  World.cells = []; World.solid = new Array(World.w * World.h).fill(false); World.objs = []; const wide = [];
+  World.cells = []; World.solid = new Array(World.w * World.h).fill(false); World.objs = []; World.reeds = []; const wide = [];
   const leg = Object.assign({}, LEGEND, M.legend || {});
   for (let y = 0; y < World.h; y++) for (let x = 0; x < World.w; x++) {
     const ch = rows[y][x] || ' ';
@@ -35,7 +35,7 @@ function loadMap(id) {
     if (L.o) {
       const ow = (L.w || 1) * 16;
       let spr = L.o; if (spr === 'tree') spr = 'tree' + Math.floor(hash2(x, y) * 3); if (spr === 'dtree') spr = 'dtree' + Math.floor(hash2(x, y) * 3);
-      World.objs.push({ x: x * 16 + ow / 2, y: y * 16 + 15, spr, light: L.light, flame: L.flame, cx: x, cy: y });
+      const ob = { x: x * 16 + ow / 2, y: y * 16 + 15, spr, light: L.light, flame: L.flame, cx: x, cy: y }; World.objs.push(ob); if (spr === 'reeds') World.reeds.push(ob);
       if (L.block && L.w === 2) wide.push(y * World.w + x + 1);
     }
     if (L.deco === 'torch') World.objs.push({ x: x * 16 + 8, y: y * 16 + 17, spr: 'torch', wallTorch: true, light: [46, 'fire'], flame: 1 });
@@ -218,9 +218,13 @@ function updateWorld(dt) {
       const pushEnt = (hitX && hitX.type === 'block') ? hitX : (hitY && hitY.type === 'block') ? hitY : null;
       if (pushEnt) { p.pushT += dt; if (p.pushT > 0.28) { tryPush(pushEnt, p.dir); p.pushT = 0; } } else p.pushT = 0;
       p.anim += sp / 9;
-      p.stepAcc += sp; if (p.stepAcc > (running ? 13 : 15)) { p.stepAcc = 0; sfx(Math.random() < 0.5 ? 'step' : 'step2', { vol: 0.35, vary: 0.1 }); }
+      // wading through reeds: rustling instead of plain footsteps
+      let inReeds = false; for (const o of World.reeds) if (Math.abs(o.x - p.x) < 10 && Math.abs((o.y - 4) - p.y) < 9) { inReeds = true; break; }
+      const rustle = (vol) => { sfx(Math.random() < 0.5 ? 'rustle' : 'rustle2', { vol, vary: 0.18 }); for (let k = 0; k < 3; k++) addPart({ x: p.x + rnd(-6, 6), y: p.y - rnd(2, 8), vx: rnd(-14, 14), vy: rnd(-22, -8), max: rnd(0.35, 0.7), size: 1, col: pick(['#5a7a42', '#7a9a58', '#3a5a32']) }); };
+      if (inReeds) { p.reedAcc = (p.reedAcc || 0) + sp; if (!p.inReeds) { p.inReeds = true; p.reedAcc = 0; rustle(0.55); } else if (p.reedAcc > (running ? 10 : 12)) { p.reedAcc = 0; rustle(0.42); } p.stepAcc = 0; }
+      else { p.inReeds = false; p.stepAcc += sp; if (p.stepAcc > (running ? 13 : 15)) { p.stepAcc = 0; sfx(Math.random() < 0.5 ? 'step' : 'step2', { vol: 0.35, vary: 0.1 }); } }
       World.trail.push([p.x, p.y, p.dir]); if (World.trail.length > 60) World.trail.shift();
-    } else p.anim = 0;
+    } else { p.anim = 0; p.inReeds = false; }
     if (Input.p('ok')) interact();
     // exits & triggers
     const tx = Math.floor(p.x / 16), ty = Math.floor((p.y - 2) / 16);
@@ -404,7 +408,7 @@ function drawWorld() {
   if (World.ivel && F('ivel') && !F('ivel_away')) list.push({ y: World.ivel.y + 2, iv: true });
   list.sort((a, b) => a.y - b.y);
   for (const it of list) {
-    if (it.o) { const o = it.o, img = SPR[o.spr]; if (!img) continue; const x = Math.round(o.x - cx - img.width / 2), y = Math.round(o.y - cy - img.height + 1); g.drawImage(img, x, y); if (o.flame) drawFlame(g, Math.round(o.x - cx), Math.round(o.y - cy) - (o.wallTorch ? 10 : 9), 1.1, World.t + o.x * 0.1, 'warm'); if (o.spr === 'candles' || o.spr === 'altar') { const by = Math.round(o.y - cy); if (o.spr === 'candles') { drawFlame(g, Math.round(o.x - cx) - 4, by - 8, 0.6, World.t + 1); drawFlame(g, Math.round(o.x - cx), by - 11, 0.6, World.t + 2); drawFlame(g, Math.round(o.x - cx) + 4, by - 7, 0.6, World.t + 3); } else { drawFlame(g, Math.round(o.x - cx) - 9, by - 14, 0.7, World.t); drawFlame(g, Math.round(o.x - cx) + 9, by - 14, 0.7, World.t + 1); } } }
+    if (it.o) { const o = it.o, img = SPR[o.spr]; if (!img) continue; let sway = 0; if (o.spr === 'reeds') { const pp = World.player; if (Math.abs(o.x - pp.x) < 20 && Math.abs(o.y - pp.y) < 20) sway = Math.round(Math.sin(World.t * 13 + o.x) * (pp.moving ? 1.6 : 0.6)); else sway = Math.round(Math.sin(World.t * 1.6 + o.x * 0.3) * 0.5); } const x = Math.round(o.x - cx - img.width / 2) + sway, y = Math.round(o.y - cy - img.height + 1); g.drawImage(img, x, y); if (o.flame) drawFlame(g, Math.round(o.x - cx), Math.round(o.y - cy) - (o.wallTorch ? 10 : 9), 1.1, World.t + o.x * 0.1, 'warm'); if (o.spr === 'candles' || o.spr === 'altar') { const by = Math.round(o.y - cy); if (o.spr === 'candles') { drawFlame(g, Math.round(o.x - cx) - 4, by - 8, 0.6, World.t + 1); drawFlame(g, Math.round(o.x - cx), by - 11, 0.6, World.t + 2); drawFlame(g, Math.round(o.x - cx) + 4, by - 7, 0.6, World.t + 3); } else { drawFlame(g, Math.round(o.x - cx) - 9, by - 14, 0.7, World.t); drawFlame(g, Math.round(o.x - cx) + 9, by - 14, 0.7, World.t + 1); } } }
     else if (it.e) drawEntSprite(g, it.e, cx, cy);
     else if (it.pl) {
       if (Game.hidePlayer) continue;
