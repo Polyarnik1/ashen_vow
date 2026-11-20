@@ -1227,30 +1227,85 @@ const MDRAW = {
     // embers
     for (let k = 0; k < 5; k++) { const q = (t + k / 5) % 1; g.globalAlpha = 0.6 * (1 - q); circ(g, 10 + k * 12 + Math.sin(p + k * 2) * 3, 82 - q * 56, 1.2, '#ff6a3a'); } g.globalAlpha = 1;
   }],
-  gareth: [92, 104, 10, (g, t, p) => {
-    const b = Math.round(Math.sin(p) * 1.5);
-    // wings of light (tattered)
-    for (const s of [-1, 1]) for (let i = 0; i < 5; i++) { const x0 = 46 + s * 10, a = -0.6 - i * 0.28 + Math.sin(p + i) * 0.05; const l = 30 + i * 3; g.globalAlpha = 0.85 - i * 0.12; poly(g, [x0, 30 + b, x0 + s * Math.cos(a) * l, 30 + b + Math.sin(a) * l * 0.9 + i * 6, x0 + s * Math.cos(a) * l * 0.8, 36 + b + Math.sin(a) * l * 0.6 + i * 8], i % 2 ? '#c8c0a8' : '#e8e0c8'); } g.globalAlpha = 1;
-    // cape
-    poly(g, [30, 34 + b, 62, 34 + b, 70, 98, 22, 98], '#5a1a1a'); for (let i = 0; i < 6; i++) poly(g, [22 + i * 8, 97, 30 + i * 8, 97, 26 + i * 8, 102 + (i % 2) * 2], '#5a1a1a');
-    // legs
-    R(g, 34, 70, 9, 26, '#6a5e40'); R(g, 49, 70, 9, 26, '#5a5034'); R(g, 32, 94, 12, 5, '#3a3428'); R(g, 48, 94, 12, 5, '#3a3428');
-    // torso
-    poly(g, [30, 36 + b, 62, 36 + b, 60, 72, 32, 72], '#a8925a'); poly(g, [30, 36 + b, 46, 36 + b, 46, 72, 32, 72], '#8a7648');
-    R(g, 43, 42 + b, 6, 18, '#e8e0d0'); R(g, 38, 48 + b, 16, 5, '#e8e0d0');
-    line(g, 36, 40 + b, 42, 58 + b, '#1a1010', 1.5); line(g, 54, 44 + b, 50, 66 + b, '#1a1010', 1.5); line(g, 42, 58 + b, 46, 64 + b, '#1a1010', 1);
-    R(g, 32, 64 + b, 28, 3, '#5a4a2a');
-    ell(g, 28, 38 + b, 9, 7, '#c8b27a'); ell(g, 64, 38 + b, 9, 7, '#c8b27a'); ell(g, 26, 37 + b, 5, 3, '#e8d8a0');
-    R(g, 20, 40 + b, 7, 20, '#a8925a'); R(g, 65, 40 + b, 7, 18, '#a8925a');
-    // greatsword
-    const sw = Math.sin(p) * 1; R(g, 72, 4 + b + sw, 4, 70, '#d8d8e8'); R(g, 72, 4 + b + sw, 1, 70, '#ffffff'); R(g, 75, 4 + b + sw, 1, 70, '#9a9aa8'); poly(g, [72, 4 + b + sw, 74, -2 + b + sw, 76, 4 + b + sw], '#e8e8f0');
-    R(g, 64, 56 + b + sw, 20, 4, '#8a7a4a'); R(g, 72, 60 + b + sw, 4, 10, '#4a2a1a'); circ(g, 74, 72 + b + sw, 3, '#c8a84a');
-    // helmet
-    R(g, 36, 12 + b, 20, 22, '#c8b27a'); R(g, 36, 12 + b, 6, 22, '#a08a5a'); poly(g, [36, 12 + b, 46, 6 + b, 56, 12 + b], '#d8c28a');
-    poly(g, [36, 18 + b, 26, 6 + b, 32, 20 + b], '#e8d8a0'); poly(g, [56, 18 + b, 66, 6 + b, 60, 20 + b], '#e8d8a0');
-    R(g, 38, 20 + b, 16, 3, '#0a0606'); R(g, 45, 20 + b, 2, 12, '#0a0606');
-    const gl = 0.6 + 0.4 * Math.sin(p * 3); g.globalAlpha = gl; R(g, 39, 20 + b, 4, 2, '#ff4a2a'); R(g, 49, 20 + b, 4, 2, '#ff4a2a'); g.globalAlpha = 1;
-    line(g, 50, 13 + b, 53, 22 + b, '#1a1010', 1);
+  gareth: [96, 112, 12, (g, t, p) => {
+    const b = Math.round(Math.sin(p) * 1.5), w1 = Math.sin(p) * 3, w2 = Math.sin(p * 2 + 0.7) * 2.5, gl = 0.6 + 0.4 * Math.sin(p * 2);
+    const au = '#c8aa62', auD = '#8a7440', auL = '#f0e0a0', wh = '#e8e0d0', whD = '#b8b0a0', red = '#ff4a2a', iron = '#8a8a98';
+    g.translate(0, 8);
+    // aura
+    g.globalAlpha = 0.14 + 0.05 * Math.sin(p); ell(g, 48, 50, 44, 46, '#ffe8a0'); g.globalAlpha = 1;
+    // wings of light: left whole, right torn
+    const TIPS = [[12, -30], [21, -25], [29, -17], [34, -7], [36, 4], [33, 15], [27, 25]];
+    for (const s2 of [-1, 1]) {
+      const torn = s2 > 0;
+      for (let layer = 0; layer < 2; layer++) for (let k = 0; k < TIPS.length; k++) {
+        if (torn && (k === 2 || k === 5) && layer === 0) continue;
+        const sc = layer ? 0.62 : (torn && k === 4 ? 0.55 : 1), sw = Math.sin(p + k * 0.8 + layer) * 1.4;
+        const bx = 48 + s2 * 13, by = 38 + b + k * 2.6 - 2;
+        const tx = bx + s2 * (TIPS[k][0] * sc + sw), ty = by + TIPS[k][1] * sc + (layer ? 6 : 0) + Math.sin(p + k) * 0.8;
+        g.globalAlpha = layer ? 0.95 : 0.88;
+        poly(g, [bx, by - 4, tx, ty - 1, tx + s2 * 1.5, ty + 5, bx, by + 5], layer ? (k % 2 ? '#d8c890' : '#c8b878') : (k % 2 ? '#d8d0b8' : '#f4eed8'));
+        g.globalAlpha = 0.35; line(g, bx, by + 1, tx, ty + 2, '#8a8068', 1);
+      }
+      g.globalAlpha = 1;
+    }
+    for (let k = 0; k < 4; k++) { R(g, 84 + (k % 2) * 3, 24 + k * 9 + Math.sin(p + k) * 2, 1, 4, '#d8d0b8'); } // hanging broken feathers
+    // tattered cape with bloodstains
+    poly(g, [35, 40 + b, 61, 40 + b, 73 + w1, 98, 68 + w2, 106, 62 + w1, 99, 56 + w2, 108, 49 + w1, 100, 42 + w2, 108, 36 + w1, 99, 30 + w2, 106, 24 + w1, 97], wh);
+    poly(g, [35, 40 + b, 48, 40 + b, 46 + w1, 100, 36 + w1, 99, 30 + w2, 106, 24 + w1, 97], whD);
+    for (const [x, y, rx, ry] of [[30, 90, 3, 6], [64, 86, 4, 7], [50, 100, 3, 5]]) { g.globalAlpha = 0.8; ell(g, x + w1 * 0.5, y, rx, ry, '#6a1a1a'); } g.globalAlpha = 1;
+    for (const x of [28, 40, 56, 68]) R(g, x + w1 * 0.7, 56 + b, 1, 40, '#9a9288');
+    // legs: gilded greaves with knee wings
+    for (const lx of [37, 50]) {
+      R(g, lx, 76, 9, 24, lx < 45 ? au : '#b09a56'); R(g, lx, 76, 2, 24, auD); R(g, lx + 6, 77, 1, 22, auL);
+      poly(g, [lx - 2, 77, lx + 4, 72, lx + 11, 77, lx + 4, 84], auL); line(g, lx + 4, 74, lx + 4, 82, auD, 1);
+      R(g, lx + 1, 88, 7, 1, auD);
+      poly(g, [lx - 3, 98, lx + 9, 98, lx + 12, 104, lx - 3, 104], '#6a5a3a'); R(g, lx - 3, 98, 12, 1, auL);
+    }
+    // faulds + chain of guilt + padlock
+    poly(g, [33, 66 + b, 63, 66 + b, 68, 80, 28, 80], auD); for (let k = 0; k < 5; k++) { R(g, 30 + k * 7, 68 + b, 6, 11, k % 2 ? au : auD); R(g, 30 + k * 7, 68 + b, 6, 1, auL); }
+    for (let k = 0; k < 10; k++) { const cx = 33 + k * 3.3, cy = 67 + b + Math.sin(k * 0.9 + p) * 0.8 + (k > 3 && k < 7 ? 3 : 0); R(g, cx, cy, 3, 2, iron); R(g, cx + 1, cy + 1, 1, 1, '#4a4a58'); }
+    R(g, 44, 72 + b, 8, 8, '#6a5a2a'); R(g, 45, 73 + b, 6, 6, '#8a7a3a'); R(g, 47, 75 + b, 2, 3, '#1a1008'); R(g, 45, 70 + b, 6, 3, iron);
+    // torso: gilded cuirass with pale-moon sunburst, red fractures
+    poly(g, [32, 38 + b, 64, 38 + b, 62, 68 + b, 34, 68 + b], au); poly(g, [32, 38 + b, 46, 38 + b, 46, 68 + b, 34, 68 + b], auD);
+    R(g, 32, 38 + b, 32, 2, auL); R(g, 61, 40 + b, 1, 26, auL);
+    for (let k = 0; k < 8; k++) { const a = k / 8 * 6.283; line(g, 50 + Math.cos(a) * 7, 52 + b + Math.sin(a) * 7, 50 + Math.cos(a) * 11, 52 + b + Math.sin(a) * 11, auL, 1); }
+    circ(g, 50, 52 + b, 7, auL); circ(g, 50, 52 + b, 5.5, '#7a6430'); circ(g, 52, 51 + b, 4.5, auL); circ(g, 53, 50 + b, 4, au);
+    g.globalAlpha = gl; line(g, 36, 41 + b, 43, 55 + b, red, 1.4); line(g, 43, 55 + b, 40, 64 + b, red, 1.1); line(g, 60, 44 + b, 54, 62 + b, red, 1.4); line(g, 39, 48 + b, 45, 49 + b, red, 1); g.globalAlpha = 1;
+    g.globalAlpha = 0.25 * gl; ell(g, 43, 56 + b, 4, 7, red); g.globalAlpha = 1;
+    R(g, 42, 34 + b, 12, 6, auD); R(g, 42, 34 + b, 12, 1, au);
+    // torn tabard
+    poly(g, [40, 66 + b, 56, 66 + b, 59, 96, 53, 88, 48, 98, 44, 89, 38, 95], wh); R(g, 47, 70 + b, 2, 16, '#b8a878'); R(g, 43, 76 + b, 10, 2, '#b8a878'); line(g, 50, 70 + b, 49, 94, '#6a1a1a', 1);
+    // layered pauldrons with spikes
+    for (const [cx, s2] of [[27, -1], [69, 1]]) {
+      ell(g, cx, 41 + b, 12, 7, au); ell(g, cx, 46 + b, 10, 5, auD); ell(g, cx - s2 * 2, 37 + b, 8, 4, auL);
+      for (let k = 0; k < 3; k++) poly(g, [cx + s2 * (k * 4 - 3), 36 + b, cx + s2 * (k * 4 - 3) + s2 * 3, 28 + b - k * 2, cx + s2 * (k * 4 - 3) + s2 * 6, 37 + b], auL);
+      g.globalAlpha = gl * 0.8; line(g, cx - 4, 40 + b, cx + 2, 46 + b, red, 1); g.globalAlpha = 1;
+    }
+    // arms and gauntlets
+    R(g, 20, 48 + b, 8, 17, au); R(g, 20, 48 + b, 2, 17, auD); R(g, 19, 63 + b, 10, 6, '#6a5a3a'); R(g, 19, 63 + b, 10, 1, auL);
+    R(g, 68, 48 + b, 8, 17, au); R(g, 68, 48 + b, 2, 17, auD);
+    // two-handed greatsword with chained hilt and cracked blade
+    const sw = Math.sin(p) * 1;
+    R(g, 76, 10 + b + sw, 6, 56, '#d8dcea'); R(g, 76, 10 + b + sw, 1, 56, '#ffffff'); R(g, 81, 10 + b + sw, 1, 56, '#8a90a8'); R(g, 78, 14 + b + sw, 2, 46, '#9aa0b8');
+    poly(g, [76, 10 + b + sw, 79, 1 + b + sw, 82, 10 + b + sw], '#eef0f8');
+    g.globalAlpha = gl; line(g, 79, 24 + b + sw, 78, 34 + b + sw, red, 1); line(g, 78, 34 + b + sw, 80, 42 + b + sw, red, 1); g.globalAlpha = 1;
+    R(g, 66, 64 + b + sw, 26, 4, au); R(g, 66, 64 + b + sw, 26, 1, auL); poly(g, [66, 64 + b + sw, 61, 61 + b + sw, 66, 68 + b + sw], auL); poly(g, [92, 64 + b + sw, 96, 61 + b + sw, 92, 68 + b + sw], auL);
+    R(g, 77, 68 + b + sw, 4, 12, '#4a2a1a'); for (let k = 0; k < 4; k++) R(g, 76 + (k % 2), 69 + k * 3 + b + sw, 4, 1, iron); circ(g, 79, 83 + b + sw, 3, auL);
+    R(g, 74, 66 + b + sw, 9, 6, '#6a5a3a'); R(g, 74, 66 + b + sw, 9, 1, auL);
+    // winged great-helm
+    for (const s2 of [-1, 1]) for (let k = 0; k < 3; k++) { const bx = 48 + s2 * 9, by = 18 + b + k * 3; poly(g, [bx, by, bx + s2 * (16 - k * 3), by - 10 + k * 3 + Math.sin(p + k) * 1, bx + s2 * (13 - k * 3), by + 4], k % 2 ? whD : wh); }
+    R(g, 38, 12 + b, 20, 24, au); R(g, 38, 12 + b, 7, 24, auD); poly(g, [38, 12 + b, 48, 5 + b, 58, 12 + b], auL); R(g, 56, 14 + b, 1, 18, auL);
+    R(g, 47, 5 + b, 2, 30, auL);
+    R(g, 40, 21 + b, 16, 3, '#0a0606'); g.globalAlpha = 0.5 + gl * 0.5; R(g, 41, 22 + b, 14, 1, red); R(g, 43, 21 + b, 3, 3, red); R(g, 51, 21 + b, 3, 3, red); g.globalAlpha = 1;
+    for (let k = 0; k < 4; k++) { R(g, 40 + k * 2, 27 + b, 1, 4, '#0a0606'); R(g, 50 + k * 2, 27 + b, 1, 4, '#0a0606'); }
+    line(g, 52, 13 + b, 55, 23 + b, '#1a1010', 1); line(g, 41, 30 + b, 44, 35 + b, '#1a1010', 1);
+    for (const x of [43, 53]) { const k = (t * 2 + x * 0.05) % 1; g.globalAlpha = 1 - k; R(g, x, 24 + b + k * 9, 1, 2 + k * 2, '#c0201a'); } g.globalAlpha = 1;
+    const fl = Math.sin(p * 2) * 2; poly(g, [44, 7 + b, 48 + fl, -4 + b, 52, 7 + b], '#f4eed8'); poly(g, [46, 7 + b, 49 + fl, -1 + b, 51, 7 + b], '#c8c0a0');
+    // broken halo
+    g.strokeStyle = au; g.lineWidth = 2; g.globalAlpha = 0.8 + 0.2 * Math.sin(p * 3); g.beginPath(); g.ellipse(48, 3 + b, 15, 4.5, 0, 0.5, 2.7); g.stroke(); g.beginPath(); g.ellipse(48, 3 + b, 15, 4.5, 0, 3.4, 5.8); g.stroke(); g.globalAlpha = 1;
+    // falling feathers & embers
+    for (let k = 0; k < 6; k++) { const q = (t + k / 6) % 1; g.globalAlpha = (1 - q) * 0.9; R(g, 8 + k * 15 + Math.sin(p + k * 1.7) * 4, 18 + q * 86, 1, 3, k % 2 ? '#f0e8c8' : '#d8c890'); } g.globalAlpha = 1;
+    for (let k = 0; k < 4; k++) { const q = (t * 1.3 + k / 4) % 1; g.globalAlpha = (1 - q) * 0.7; circ(g, 24 + k * 16 + Math.sin(p + k) * 3, 98 - q * 60, 1.1, '#ff6a3a'); } g.globalAlpha = 1;
   }],
   moth: [64, 46, 8, (g, t, p) => {
     const f = Math.abs(Math.sin(p * 2)), y = Math.sin(p * 2) * 2;
