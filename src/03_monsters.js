@@ -360,16 +360,51 @@ const MDRAW = {
     line(g, 31, 11 + y, 27, 3 + y, '#c8c4d8', 1); line(g, 33, 11 + y, 37, 3 + y, '#c8c4d8', 1);
     for (let i = 0; i < 4; i++) { const k = (t + i / 4) % 1; g.globalAlpha = 1 - k; R(g, 20 + i * 8, 34 + k * 10, 1, 1, '#e8e8ff'); } g.globalAlpha = 1;
   }],
-  drowned: [44, 60, 8, (g, t, p) => {
-    const b = Math.round(Math.sin(p) * 1.5), sw = Math.sin(p) * 2;
-    R(g, 14, 44, 6, 14, '#3a5a6a'); R(g, 24, 44, 6, 14, '#34505e');
-    ell(g, 22, 34 + b, 12, 14, '#4a6a7a'); ell(g, 19, 35 + b, 8, 12, '#3e5a6a');
-    poly(g, [10, 28 + b, 2 + sw, 46 + b, 6 + sw, 48 + b, 14, 34 + b], '#4a6a7a'); poly(g, [34, 28 + b, 42 - sw, 44 + b, 38 - sw, 46 + b, 30, 34 + b], '#4a6a7a');
-    ell(g, 22, 15 + b, 9, 9, '#6a8a92'); ell(g, 19, 16 + b, 6, 8, '#5a7a82');
-    circ(g, 18, 15 + b, 2.5, '#d8e8e0'); circ(g, 26, 15 + b, 2.5, '#d8e8e0'); R(g, 18, 15 + b, 1, 1, '#1a2a2a'); R(g, 26, 15 + b, 1, 1, '#1a2a2a');
-    ell(g, 22, 21 + b, 3, 2, '#1a2a30');
-    for (let i = 0; i < 6; i++) { const x = 13 + i * 3.5; line(g, x, 8 + b, x + Math.sin(p + i) * 2, 26 + b + (i % 3) * 4, '#2a4a2a', 1.5); }
-    for (let i = 0; i < 3; i++) { const k = (t * 1.5 + i / 3) % 1; R(g, 12 + i * 10, 30 + b + k * 26, 1, 2, '#7ab8d8'); }
+  drowned: [64, 78, 12, (g, t, p) => {
+    const b = Math.round(Math.sin(p) * 1.2), sw = Math.sin(p) * 2, sk = '#6e8a7a', skD = '#4e685c', skL = '#8aa696', rot = '#2e4a3a', bone = '#cfd0bc', rag = '#3a4038';
+    // puddle with ripples
+    g.globalAlpha = 0.7; ell(g, 32, 74, 24, 3.5, '#223c4a'); g.globalAlpha = 1;
+    for (let k = 0; k < 2; k++) { const q = (t + k * 0.5) % 1; g.globalAlpha = (1 - q) * 0.6; g.strokeStyle = '#7ab8d8'; g.lineWidth = 1; g.beginPath(); g.ellipse(32, 74, 8 + q * 18, 1.5 + q * 2.2, 0, 0, 6.283); g.stroke(); } g.globalAlpha = 1;
+    // legs: rotten, bare shin bone, bare feet
+    for (const lx of [20, 35]) { R(g, lx, 50, 9, 22, lx < 30 ? sk : skD); R(g, lx, 50, 3, 22, skD); R(g, lx + 2, 60, 5, 9, bone); R(g, lx + 4, 60, 1, 9, '#a0a090'); R(g, lx + 2, 63, 5, 1, '#a0a090'); R(g, lx - 1, 69, 11, 4, skL); for (let k = 0; k < 3; k++) R(g, lx + k * 3, 72, 2, 2, skD); }
+    poly(g, [18, 48, 46, 48, 48, 62, 44, 59, 40, 66, 36, 58, 30, 64, 24, 58, 20, 65, 16, 60], rag);
+    for (let k = 0; k < 4; k++) R(g, 20 + k * 7, 56 + (k % 2) * 3, 1, 5 + (k % 2) * 3, '#1e221e');
+    // hunched torso: green-grey flesh, torn tunic, exposed ribs
+    poly(g, [16, 26 + b, 48, 26 + b, 46, 52, 18, 52], sk); poly(g, [16, 26 + b, 30, 26 + b, 28, 52, 18, 52], skD);
+    ell(g, 31, 40 + b, 8, 9, '#162420'); for (let k = 0; k < 4; k++) { R(g, 25, 34 + k * 4 + b, 12, 1, bone); } R(g, 31, 33 + b, 1, 15, '#a0a090');
+    poly(g, [14, 26 + b, 24, 26 + b, 20, 50, 16, 46, 12, 52], rag); poly(g, [40, 26 + b, 50, 26 + b, 54, 48, 48, 44, 44, 52, 40, 46], rag);
+    for (const [x, y, r] of [[22, 30, 3], [42, 44, 4], [26, 48, 3], [46, 31, 2.5]]) { g.globalAlpha = 0.8; ell(g, x, y + b, r, r * 0.8, rot); } g.globalAlpha = 1;
+    // barnacles on shoulder
+    for (const [x, y] of [[44, 24], [47, 27], [42, 28], [49, 23]]) { circ(g, x, y + b, 2, '#cfc8b0'); circ(g, x, y + b, 0.9, '#2a2a22'); }
+    // anchor chain around neck and waist, rusty anchor on chest
+    for (let k = 0; k < 9; k++) { const cx = 18 + k * 3.6, cy = 26 + b + Math.sin(k / 8 * 3.14) * 5; R(g, cx, cy, 3, 2, '#7a6a5a'); R(g, cx + 1, cy + 1, 1, 1, '#3a2e26'); }
+    for (let k = 0; k < 6; k++) R(g, 31 + Math.sin(p + k) * 0.6, 31 + k * 3 + b, 2, 2, '#7a6a5a');
+    R(g, 30, 46 + b, 4, 1, '#8a5a3a'); R(g, 31, 46 + b, 2, 6, '#8a5a3a'); g.strokeStyle = '#8a5a3a'; g.lineWidth = 1.4; g.beginPath(); g.arc(32, 50 + b, 4.5, 0.2, 2.94); g.stroke(); R(g, 26, 50 + b, 2, 2, '#8a5a3a'); R(g, 36, 50 + b, 2, 2, '#8a5a3a'); circ(g, 32, 45 + b, 1.5, '#8a5a3a');
+    // left arm: reaching up like a zombie, long bony fingers
+    poly(g, [16, 28 + b, 22, 30 + b, 10 + sw * 0.4, 16 + b, 4 + sw * 0.4, 18 + b], sk); poly(g, [16, 28 + b, 18, 29 + b, 7 + sw * 0.4, 17 + b, 4 + sw * 0.4, 18 + b], skD);
+    R(g, 8 + sw * 0.4, 20 + b, 3, 3, bone);
+    for (let f2 = 0; f2 < 4; f2++) line(g, 5 + sw * 0.4 + f2 * 1.8, 17 + b, 1 + sw * 0.4 + f2 * 3 - 2, 6 + b + f2 * 0.8 + Math.sin(p * 2 + f2) * 1, bone, 1.2);
+    // right arm hangs, clutching a corroded sword
+    poly(g, [42, 28 + b, 48, 28 + b, 54, 48 + b, 48, 50 + b], sk); poly(g, [42, 28 + b, 44, 28 + b, 50, 49 + b, 48, 50 + b], skD); R(g, 51, 40 + b, 3, 3, bone);
+    R(g, 54, 56 + b, 6, 7, skL); for (let f2 = 0; f2 < 3; f2++) R(g, 54 + f2 * 2, 62 + b, 1, 3, bone);
+    R(g, 55, 22 + b, 3, 36, '#6a5a4a'); R(g, 55, 22 + b, 1, 36, '#8a7a66'); poly(g, [55, 22 + b, 56.5, 16 + b, 58, 22 + b], '#6a5a4a'); R(g, 51, 54 + b, 11, 2, '#8a5a3a'); for (const [x, y] of [[56, 30], [56, 40], [57, 48]]) R(g, x, y + b, 1, 2, '#8a4a22');
+    // seaweed draped from the shoulders
+    for (let k = 0; k < 4; k++) { const x = 14 + k * 4; line(g, x, 26 + b, x + Math.sin(p + k) * 2, 40 + b + k * 2, '#2a5a2a', 1.6); line(g, x + Math.sin(p + k) * 2, 40 + b + k * 2, x + Math.sin(p + k + 1) * 3, 48 + b + k * 2, '#3a7a3a', 1.2); }
+    // head: sunken, bloated; stringy kelp hair
+    ell(g, 31, 14 + b, 11.5, 12.5, sk); ell(g, 27, 15 + b, 7.5, 11, skD); ell(g, 36, 11 + b, 5, 5, skL);
+    for (const [x, y, r] of [[24, 8, 2.5], [38, 18, 2], [30, 21, 2]]) { g.globalAlpha = 0.75; ell(g, x, y + b, r, r * 0.8, rot); } g.globalAlpha = 1;
+    ell(g, 24, 21 + b, 3, 4, '#3e5a4e'); ell(g, 38, 21 + b, 3, 4, '#3e5a4e');
+    for (let k = 0; k < 8; k++) { const x = 20 + k * 3; line(g, x, 4 + b, x + Math.sin(p + k * 0.9) * 2.5 - (k < 4 ? 3 : -3), 18 + b + (k % 3) * 5, k % 2 ? '#1e3a22' : '#2a4a2e', 1.6); }
+    ell(g, 28, 9 + b, 2.5, 1.5, '#cfc8b0'); // shell in hair
+    R(g, 23, 12 + b, 6, 5, '#0a1410'); R(g, 33, 12 + b, 6, 5, '#0a1410');
+    const gl = 0.65 + 0.35 * Math.sin(p * 2); g.globalAlpha = gl; R(g, 25, 13 + b, 3, 3, '#e8ff8a'); R(g, 35, 14 + b, 3, 3, '#e8ff8a'); g.globalAlpha = 1; R(g, 26, 14 + b, 1, 1, '#2a3a10');
+    R(g, 30, 17 + b, 2, 3, '#0a1410'); // missing nose
+    poly(g, [25, 22 + b, 38, 22 + b, 36, 29 + b + Math.abs(Math.sin(p)) * 2, 27, 29 + b + Math.abs(Math.sin(p)) * 2], '#0a1410');
+    for (let k = 0; k < 4; k++) R(g, 26 + k * 3 + (k % 2), 22 + b, 2, 2 + (k % 2), bone); for (let k = 0; k < 3; k++) R(g, 27 + k * 3, 27 + b + Math.abs(Math.sin(p)) * 2, 2, 2, bone);
+    for (let k = 0; k < 3; k++) { const q = (t * 2 + k / 3) % 1; g.globalAlpha = 1 - q; R(g, 28 + k * 3, 29 + b + q * 14, 1, 2, '#7ab8d8'); } g.globalAlpha = 1;
+    // drips from fingers and arms, rising bubbles
+    for (let k = 0; k < 4; k++) { const q = (t * 1.5 + k / 4) % 1; g.globalAlpha = 1 - q; R(g, 6 + k * 2, 22 + b + q * 40, 1, 2, '#7ab8d8'); R(g, 54 + k * 2, 66 + q * 8, 1, 2, '#7ab8d8'); } g.globalAlpha = 1;
+    for (let k = 0; k < 3; k++) { const q = (t + k / 3) % 1; g.globalAlpha = 0.7 * (1 - q); g.strokeStyle = '#b8e0f0'; g.lineWidth = 1; g.beginPath(); g.arc(46 + k * 4 + Math.sin(p + k) * 2, 20 - q * 18, 1.5 + k * 0.4, 0, 6.283); g.stroke(); } g.globalAlpha = 1;
   }],
   shade: [44, 56, 8, (g, t, p) => {
     const y = Math.sin(p) * 2;
@@ -382,31 +417,61 @@ const MDRAW = {
     for (let i = 0; i < 3; i++) { const k = (t + i / 3) % 1; g.globalAlpha = 1 - k; setFontless(g, 30 + i * 3, 10 + y - k * 10, 3); } g.globalAlpha = 1;
   }],
   king: [124, 124, 12, (g, t, p) => {
-    const y = Math.round(Math.sin(p) * 2);
-    // seal circle behind
-    g.strokeStyle = '#3a4a7a'; g.lineWidth = 1.5; g.beginPath(); g.arc(62, 50, 50, 0, 6.283); g.stroke();
-    g.beginPath(); g.arc(62, 50, 42, 0, 6.283); g.stroke();
-    for (let i = 0; i < 16; i++) { const a = i / 16 * 6.283 + p * 0.1; R(g, 62 + Math.cos(a) * 46 - 1.5, 50 + Math.sin(a) * 46 - 1.5, 3, 3, i % 2 ? '#6a8aca' : '#9fd0ff'); }
-    // robe
-    poly(g, [62, 40 + y, 30, 56 + y, 18, 122, 106, 122, 94, 56 + y], '#3a3a4a'); poly(g, [62, 40 + y, 30, 56 + y, 18, 122, 50, 122, 56, 56 + y], '#2a2a38');
-    for (let i = 0; i < 8; i++) poly(g, [18 + i * 11, 120, 29 + i * 11, 120, 23 + i * 11 + Math.sin(p + i) * 2, 124], '#2a2a38');
-    R(g, 58, 52 + y, 8, 66, '#6a6a7a'); for (let k = 0; k < 6; k++) circ(g, 62, 58 + k * 10 + y, 2, '#9fd0ff');
-    ell(g, 32, 56 + y, 12, 8, '#4a4a5a'); ell(g, 92, 56 + y, 12, 8, '#4a4a5a');
-    // skeletal hands
-    for (const [x, s] of [[16, -1], [108, 1]]) { R(g, x - 3, 62 + y, 6, 26, '#3a3a4a'); for (let f2 = 0; f2 < 4; f2++) R(g, x - 3 + f2 * 2, 88 + y, 1, 6 + Math.sin(p * 2 + f2) * 1, '#c8c8c0'); }
-    // head
-    ell(g, 62, 34 + y, 13, 14, '#b8b8b0'); ell(g, 58, 35 + y, 9, 12, '#9a9a92');
-    R(g, 54, 31 + y, 6, 5, '#0a0a12'); R(g, 65, 31 + y, 6, 5, '#0a0a12');
-    const gl = 0.7 + 0.3 * Math.sin(p * 2); g.globalAlpha = gl; R(g, 56, 32 + y, 3, 3, '#e8f4ff'); R(g, 67, 32 + y, 3, 3, '#e8f4ff'); g.globalAlpha = 1;
-    R(g, 61, 37 + y, 3, 3, '#3a3a40');
-    poly(g, [50, 40 + y, 74, 40 + y, 70, 62 + y, 62, 68 + y, 54, 62 + y], '#d8d8d8'); poly(g, [56, 42 + y, 68, 42 + y, 66, 58 + y, 58, 58 + y], '#e8e8e8');
-    R(g, 56, 41 + y, 12, 2, '#2a2a30');
-    // crown
-    R(g, 48, 18 + y, 28, 7, '#7a7a86'); R(g, 48, 18 + y, 28, 1, '#c8c8d4');
-    for (let i = 0; i < 5; i++) poly(g, [48 + i * 6, 18 + y, 51 + i * 6, 6 + y + (i === 2 ? -4 : 0), 54 + i * 6, 18 + y], '#8a8a96');
-    circ(g, 62, 21 + y, 2.5, '#9fd0ff');
-    // floating crown shards
-    for (let i = 0; i < 6; i++) { const a = p + i * 1.047; const rx = 62 + Math.cos(a) * 30, ry = 20 + y + Math.sin(a) * 8; poly(g, [rx, ry - 4, rx + 2, ry, rx, ry + 4, rx - 2, ry], Math.sin(a) > 0 ? '#9a9aa6' : '#6a6a76'); }
+    const y = Math.round(Math.sin(p) * 2), w1 = Math.sin(p) * 3, w2 = Math.sin(p * 2 + 1) * 2.5, gl = 0.7 + 0.3 * Math.sin(p * 2);
+    const rnd1 = i => { const x = Math.sin(i * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); };
+    const sil = '#9aa6c8', silD = '#5a6488';
+    // seal circle behind: double ring, radial spokes, orbiting runes
+    g.globalAlpha = 0.18 + 0.05 * Math.sin(p); circ(g, 62, 52, 52, '#3a4a9a'); g.globalAlpha = 1;
+    g.strokeStyle = '#3a4a7a'; g.lineWidth = 1.2; for (const r of [54, 46, 36]) { g.beginPath(); g.arc(62, 52, r, 0, 6.283); g.stroke(); }
+    for (let k = 0; k < 12; k++) { const a = k / 12 * 6.283; line(g, 62 + Math.cos(a) * 36, 52 + Math.sin(a) * 36, 62 + Math.cos(a) * 46, 52 + Math.sin(a) * 46, '#2a3668', 1); }
+    for (let k = 0; k < 18; k++) { const a = k / 18 * 6.283 + p * 0.12; const rx = 62 + Math.cos(a) * 50, ry = 52 + Math.sin(a) * 50; R(g, rx - 1.5, ry - 1.5, 3, 3, k % 3 ? '#6a8aca' : '#9fd0ff'); if (k % 3 === 0) R(g, rx - 0.5, ry - 3, 1, 6, '#9fd0ff'); }
+    // chains of grey light binding the wrists to the void
+    for (const [cx0, s2] of [[16, -1], [108, 1]]) for (let k = 0; k < 9; k++) { const cy = 96 + k * 3.2; g.globalAlpha = 0.8 - k * 0.07; R(g, cx0 + s2 * (k % 2 ? 1 : -1) + Math.sin(p + k) * 1.2, cy, 3, 2, '#aab4d8'); R(g, cx0 + 1 + Math.sin(p + k) * 1.2, cy + 1, 1, 1, '#4a5488'); } g.globalAlpha = 1;
+    // outer cloak, long and hooded
+    poly(g, [62, 22 + y, 46, 34 + y, 32, 60 + y, 12, 118, 112, 118, 92, 60 + y, 78, 34 + y], '#1c1c2e');
+    poly(g, [62, 22 + y, 46, 34 + y, 32, 60 + y, 12, 118, 36, 118, 50, 60 + y, 56, 34 + y], '#12121f');
+    // starry void lining (the front opening)
+    poly(g, [62, 40 + y, 48, 64 + y, 38, 118, 86, 118, 76, 64 + y], '#06061a');
+    for (let k = 0; k < 46; k++) { const sx = 40 + rnd1(k) * 44, sy = 52 + y + rnd1(k + 90) * 64; const edge = Math.abs(sx - 62) < (sy - (40 + y)) * 0.36 + 1; if (!edge) continue; const tw = 0.4 + 0.6 * Math.abs(Math.sin(p * 2 + k)); g.globalAlpha = tw; R(g, sx, sy, 1, 1, k % 5 ? '#b8c8f0' : '#fff'); if (k % 9 === 0) { R(g, sx - 1, sy, 3, 1, '#9fd0ff'); R(g, sx, sy - 1, 1, 3, '#9fd0ff'); } } g.globalAlpha = 1;
+    g.globalAlpha = 0.35; for (const [a, b2, c, d] of [[56, 72, 62, 80], [62, 80, 70, 76], [70, 76, 66, 90], [50, 92, 58, 100], [58, 100, 64, 96]]) line(g, a, b2 + y, c, d + y, '#9fd0ff', 1); g.globalAlpha = 1;
+    // silver embroidery along the opening and hem; ragged hem tatters
+    line(g, 62, 40 + y, 48, 64 + y, silD, 1.6); line(g, 48, 64 + y, 38, 118, silD, 1.6); line(g, 62, 40 + y, 76, 64 + y, sil, 1.6); line(g, 76, 64 + y, 86, 118, sil, 1.6);
+    for (let k = 0; k < 9; k++) { R(g, 41 + k * 0.4 + (k * 4.4), 70 + k * 5 + y, 1, 1, '#9fd0ff'); R(g, 80 - k * 0.1 - k * 0.9 + k, 70 + k * 5 + y, 1, 1, '#9fd0ff'); }
+    for (let k = 0; k < 9; k++) poly(g, [12 + k * 11.2, 116, 23 + k * 11.2, 116, 17 + k * 11.2 + Math.sin(p + k) * 2.5, 124], k % 2 ? '#12121f' : '#1c1c2e');
+    for (const x of [24, 98]) R(g, x + w1 * 0.6, 70 + y, 1, 44, '#0a0a14');
+    // mantle with ghostly collar of mist-feathers
+    ell(g, 36, 58 + y, 14, 9, '#252538'); ell(g, 88, 58 + y, 14, 9, '#252538'); R(g, 24, 54 + y, 76, 3, '#3a3a56');
+    for (let k = 0; k < 6; k++) { const a = Math.PI + 0.35 + k * 0.4; poly(g, [62 + Math.cos(a) * 16, 52 + y + Math.sin(a) * 6, 62 + Math.cos(a) * 30, 50 + y + Math.sin(a) * 10 - 4, 62 + Math.cos(a) * 18, 58 + y + Math.sin(a) * 6], k % 2 ? '#6a7298' : '#8a92b8'); }
+    // broken scepter (left hand) with cracked orb
+    R(g, 14, 40 + y, 3, 78, '#4a4a60'); R(g, 14, 40 + y, 1, 78, '#7a7a92'); for (let k = 0; k < 6; k++) R(g, 13, 52 + k * 11 + y, 5, 1, '#8a8aa2');
+    g.globalAlpha = 0.45 * gl; circ(g, 15, 33 + y, 9, '#9fd0ff'); g.globalAlpha = 1; circ(g, 15, 33 + y, 5, '#1a2a5a'); circ(g, 15, 33 + y, 3.5, '#9fd0ff'); R(g, 14, 31 + y, 1, 1, '#fff'); line(g, 12, 29 + y, 17, 37 + y, '#06061a', 1);
+    for (let k = 0; k < 3; k++) { const a = p * 1.5 + k * 2.1; poly(g, [15 + Math.cos(a) * 10, 32 + y + Math.sin(a) * 4 - 2, 17 + Math.cos(a) * 10, 32 + y + Math.sin(a) * 4, 15 + Math.cos(a) * 10, 32 + y + Math.sin(a) * 4 + 2], '#8aa6d8'); }
+    // frozen hourglass (right hand): time stopped
+    R(g, 100, 62 + y, 16, 2, '#7a7a92'); R(g, 100, 92 + y, 16, 2, '#7a7a92'); R(g, 101, 64 + y, 1, 28, '#5a5a72'); R(g, 114, 64 + y, 1, 28, '#5a5a72');
+    poly(g, [103, 65 + y, 113, 65 + y, 109, 78 + y, 107, 78 + y], '#c8d0e8'); poly(g, [107, 78 + y, 109, 78 + y, 113, 91 + y, 103, 91 + y], '#6a7298');
+    g.globalAlpha = 0.5 * gl; R(g, 107, 70 + y, 2, 6, '#9fd0ff'); g.globalAlpha = 1; R(g, 107, 78 + y, 2, 2, '#e8f4ff');
+    // sleeves + skeletal hands
+    R(g, 11, 56 + y, 10, 36, '#252538'); R(g, 99, 56 + y, 8, 20, '#252538'); R(g, 11, 56 + y, 3, 36, '#161626');
+    R(g, 11, 90 + y, 10, 4, sil); R(g, 100, 74 + y, 10, 3, sil);
+    for (let f2 = 0; f2 < 4; f2++) { R(g, 11 + f2 * 3, 93 + y, 1, 6 + Math.sin(p * 2 + f2) * 1, '#d0d0c8'); R(g, 100 + f2 * 2.5, 77 + y, 1, 5 + Math.sin(p * 2 + f2 + 1), '#d0d0c8'); }
+    // hood: face lost in shadow, two pale lights, veil of mist and a drifting beard of wisps
+    ell(g, 62, 36 + y, 17, 20, '#14141f'); ell(g, 62, 38 + y, 13, 16, '#05050c');
+    g.globalAlpha = 0.22; ell(g, 62, 44 + y, 9, 11, '#c8d0e0'); g.globalAlpha = 1;
+    R(g, 55, 36 + y, 5, 3, '#06060e'); R(g, 65, 36 + y, 5, 3, '#06060e'); g.globalAlpha = gl; R(g, 56, 37 + y, 3, 2, '#e8f4ff'); R(g, 66, 37 + y, 3, 2, '#e8f4ff'); g.globalAlpha = 0.35 * gl; ell(g, 57.5, 38 + y, 5, 3.5, '#9fd0ff'); ell(g, 67.5, 38 + y, 5, 3.5, '#9fd0ff'); g.globalAlpha = 1;
+    R(g, 60, 42 + y, 4, 2, '#202030'); R(g, 58, 48 + y, 8, 1, '#202030'); for (let k = 0; k < 5; k++) R(g, 58 + k * 2, 48 + y, 1, 2, '#9a9a98');
+    for (let k = 0; k < 7; k++) { g.globalAlpha = 0.55 - k * 0.05; const bx = 62 + (k - 3) * 3, by = 50 + y; line(g, bx, by, bx + Math.sin(p + k) * 3, by + 12 + (k % 3) * 4, '#c8d0e0', 1.6); } g.globalAlpha = 1;
+    // tall cracked crown with a gap and a bleeding-blue gem
+    R(g, 46, 16 + y, 32, 8, '#6a6a7a'); R(g, 46, 16 + y, 32, 1, '#d0d0dc'); R(g, 46, 23 + y, 32, 1, '#3a3a46');
+    const SP = [[0, 8], [1, 14], [2, 18], [3, 12], [4, 20], [5, 13], [6, 9]];
+    for (const [k, h] of SP) { if (k === 3) continue; const x0 = 46 + k * 4.6; poly(g, [x0, 16 + y, x0 + 2.3, 16 + y - h, x0 + 4.6, 16 + y], k % 2 ? '#8a8a9a' : '#a0a0b0'); }
+    circ(g, 62, 20 + y, 3, '#1a2a6a'); circ(g, 62, 20 + y, 2, '#9fd0ff'); R(g, 61, 19 + y, 1, 1, '#fff'); g.globalAlpha = 0.4 * gl; circ(g, 62, 20 + y, 6, '#9fd0ff'); g.globalAlpha = 1;
+    line(g, 54, 17 + y, 56, 23 + y, '#14141c', 1); line(g, 70, 16 + y, 68, 22 + y, '#14141c', 1);
+    // the missing crown fragment hovers as a shard orbit
+    for (let k = 0; k < 6; k++) { const a = p + k * 1.047; const rx = 62 + Math.cos(a) * 32, ry = 18 + y + Math.sin(a) * 8; poly(g, [rx, ry - 4, rx + 2, ry, rx, ry + 4, rx - 2, ry], Math.sin(a) > 0 ? '#9a9aa6' : '#5a5a68'); }
+    // sleepers he "saved": three faint closed-eye faces circling the seal
+    for (let k = 0; k < 3; k++) { const a = -p * 0.7 + k * 2.094 + 0.6; const fx = 62 + Math.cos(a) * 54, fy = 66 + y + Math.sin(a) * 30; g.globalAlpha = 0.32 + 0.1 * Math.sin(p + k); ell(g, fx, fy, 4.5, 5.5, '#c8d0f0'); R(g, fx - 3, fy - 1, 2, 1, '#2a3050'); R(g, fx + 1, fy - 1, 2, 1, '#2a3050'); R(g, fx - 1, fy + 2, 2, 1, '#2a3050'); } g.globalAlpha = 1;
+    // drifting motes
+    for (let k = 0; k < 8; k++) { const q = (t + k / 8) % 1; g.globalAlpha = 0.6 * (1 - q); R(g, 8 + k * 14 + Math.sin(p + k) * 3, 114 - q * 90, 1, 1, '#9fd0ff'); } g.globalAlpha = 1;
   }],
 };
 function setFontless(g, x, y, s) { // tiny "z"
