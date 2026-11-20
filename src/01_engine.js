@@ -5,7 +5,17 @@ const $ = id => document.getElementById(id);
 const cv = $('game'), ctx = cv.getContext('2d');
 const low = document.createElement('canvas'); low.width = W; low.height = H;
 const lc = low.getContext('2d');
-const isTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || /[?&]touch=1/.test(location.search);
+// Touch UI only on real touch-first devices (phones/tablets). Desktops and touchscreen laptops
+// have a fine primary pointer (mouse/trackpad), so they keep the plain keyboard layout.
+let isTouch = (() => {
+  if (/[?&]touch=0/.test(location.search)) return false;
+  if (/[?&]touch=1/.test(location.search)) return true;
+  const mm = q => { try { return window.matchMedia(q).matches; } catch (e) { return false; } };
+  const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  if (!hasTouch) return false;
+  if (mm('(pointer: fine)') && mm('(hover: hover)')) return false; // mouse/trackpad is primary
+  return mm('(pointer: coarse)') || mm('(hover: none)') || /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+})();
 let PR = 1; // canvas pixels per logical pixel
 let FRAME = 0, TIME = 0;
 
@@ -36,6 +46,12 @@ function layout() {
   }
 }
 window.addEventListener('resize', layout);
+// Hybrid devices: switch the touch overlay off when a keyboard / mouse is used, back on when a finger is.
+window.addEventListener('keydown', e => { if (isTouch && !e.repeat && e.key && e.key.length <= 12 && e.isTrusted) { isTouch = false; layout(); } }, true);
+window.addEventListener('pointerdown', e => {
+  const t = e.pointerType === 'touch' || e.pointerType === 'pen';
+  if (t !== isTouch && (e.pointerType === 'mouse' ? isTouch : !isTouch)) { isTouch = t; layout(); }
+}, true);
 window.addEventListener('orientationchange', () => setTimeout(layout, 200));
 
 // ================= UTIL =================

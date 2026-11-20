@@ -313,7 +313,7 @@ async function boot() {
   makeTiles(); makeObjects(); makeMonsters(); makeVignette();
   for (const k in CHARDEF) makeChar(k, CHARDEF[k]);
   for (const k in PORTDEF) getPortrait(k, 0);
-  if (isTouch) setupTouch();
+  setupTouch();
   const ld = $('loading'); if (ld) ld.remove();
   Game.scene = 'title'; Game.titleT = 0;
   requestAnimationFrame(frame);
