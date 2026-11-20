@@ -74,6 +74,7 @@ function layout() {
   if (isTouch && portrait) ah = Math.min(vh * 0.55, vw * H / W + 24);
   if (isTouch && !portrait) { side = clamp(vw * 0.15, 90, 170); aw = vw - side * 2; }
   let s = Math.min(aw / W, ah / H);
+  if (!isTouch) s *= 0.94; // small breathing room around the picture on desktop
   const cw = Math.floor(W * s), ch = Math.floor(H * s);
   cv.style.width = cw + 'px'; cv.style.height = ch + 'px';
   cv.style.left = ((vw - cw) / 2) + 'px';
