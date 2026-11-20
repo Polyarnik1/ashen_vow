@@ -134,22 +134,73 @@ const MDRAW = {
     for (let k = 0; k < 6; k++) { const a = k / 6 * 6.283; R(g, hx + 2 + Math.cos(a) * 5, hy + 1 + Math.sin(a) * (o - 1), 1, 1, '#e8e0d0'); }
     for (const dx of [-5, 8]) R(g, hx + dx, hy - 5, 2, 2, '#ffd23a');
   }],
-  tomas: [60, 76, 10, (g, t, p) => {
-    const b = Math.round(Math.sin(p) * 1.5);
-    // tattered banner pole
-    R(g, 46, 4 + b, 2, 66, '#5a4030');
-    const w = Math.sin(p * 2) * 2; poly(g, [48, 6 + b, 60, 8 + b + w, 58, 22 + b + w, 54, 18 + b, 50, 26 + b, 48, 26 + b], '#2a3058'); R(g, 52, 12 + b, 3, 6, '#b8b0a0');
-    R(g, 20, 50, 6, 20, '#2a2a34'); R(g, 32, 50, 6, 20, '#2a2a34'); R(g, 18, 68, 9, 4, '#1a1a20'); R(g, 31, 68, 9, 4, '#1a1a20');
-    poly(g, [16, 28 + b, 42, 28 + b, 40, 52, 18, 52], '#4a4e5a'); poly(g, [16, 28 + b, 28, 28 + b, 28, 52, 18, 52], '#3a3e4a');
-    poly(g, [22, 30 + b, 36, 30 + b, 34, 54, 24, 54], '#2a3048'); R(g, 28, 34 + b, 2, 8, '#8a8a7a'); R(g, 25, 37 + b, 8, 2, '#8a8a7a');
-    ell(g, 14, 30 + b, 6, 4, '#5a5e6a'); ell(g, 44, 30 + b, 6, 4, '#5a5e6a');
-    R(g, 10, 32 + b, 5, 14, '#4a4e5a'); R(g, 43, 32 + b, 5, 12, '#4a4e5a'); R(g, 43, 42 + b, 5, 4, '#8fa894');
-    ell(g, 29, 18 + b, 9, 10, '#8fa894'); ell(g, 26, 19 + b, 6, 9, '#7a9280');
-    poly(g, [19, 14 + b, 29, 6 + b, 39, 14 + b, 38, 18 + b, 34, 13 + b, 24, 13 + b, 20, 18 + b], '#4a4038');
-    R(g, 24, 18 + b, 3, 3, '#0a1410'); R(g, 31, 18 + b, 3, 3, '#0a1410');
-    const gl = 0.6 + 0.4 * Math.sin(p * 3); g.globalAlpha = gl; R(g, 24, 18 + b, 3, 2, '#9fffd0'); R(g, 31, 18 + b, 3, 2, '#9fffd0'); g.globalAlpha = 1;
-    R(g, 26, 24 + b, 6, 1, '#2a3a30'); line(g, 22, 22 + b, 23, 26 + b, '#5a7060', 1);
-    for (let i = 0; i < 3; i++) { g.globalAlpha = 0.5; circ(g, 12 + i * 16 + Math.sin(p + i) * 3, 60 - ((t + i / 3) % 1) * 40, 1.5, '#9fffd0'); } g.globalAlpha = 1;
+  tomas: [80, 92, 12, (g, t, p) => {
+    const b = Math.round(Math.sin(p) * 1.4), w1 = Math.sin(p) * 3, w2 = Math.sin(p * 2 + 1) * 2.5, gl = 0.65 + 0.35 * Math.sin(p * 2);
+    const steel = '#5c606e', steelD = '#3c3f4c', steelL = '#8a8fa2', rust = '#7a4a2e', blue = '#26327a', blueD = '#171e4c', bone = '#d8d2bc', boneD = '#a8a28c', teal = '#9fffd0';
+    // pale-moon halo behind him
+    g.globalAlpha = 0.16 + 0.06 * Math.sin(p); g.fillStyle = '#9fc8ff'; g.beginPath(); g.arc(38, 40 + b, 36, 0, 6.2832); g.fill();
+    g.globalCompositeOperation = 'destination-out'; g.globalAlpha = 1; g.beginPath(); g.arc(50, 34 + b, 33, 0, 6.2832); g.fill(); g.globalCompositeOperation = 'source-over'; g.globalAlpha = 1;
+    // tattered cape
+    poly(g, [24, 34 + b, 56, 34 + b, 66 + w1, 76, 62 + w2, 84, 57 + w1, 78, 51 + w2, 88, 45 + w1, 80, 39 + w2, 87, 33 + w1, 79, 27 + w2, 86, 22 + w1, 78, 14 + w2, 82, 12 + w1, 70], blueD);
+    poly(g, [28, 36 + b, 40, 36 + b, 38 + w1, 84, 31 + w2, 80, 25 + w1, 70], blue);
+    for (const x of [20, 30, 50, 58]) R(g, x + w1 * (x > 40 ? 0.8 : 0.4), 52 + b, 1, 22, '#0f1436');
+    // legs: rusted greaves, bare shin bone
+    for (const lx of [28, 43]) {
+      R(g, lx, 70, 9, 15, steelD); R(g, lx + 1, 74, 7, 5, bone); R(g, lx + 3, 74, 1, 5, boneD); R(g, lx + 5, 75, 1, 4, boneD);
+      R(g, lx - 1, 69, 11, 4, steel); R(g, lx - 1, 69, 11, 1, steelL); R(g, lx, 80, 9, 5, steel); R(g, lx - 2, 84, 13, 6, '#22222c'); R(g, lx - 2, 84, 13, 1, '#3a3a46');
+    }
+    // tassets / hips
+    poly(g, [25, 60 + b, 55, 60 + b, 58, 72, 22, 72], steelD); for (let i = 0; i < 4; i++) { R(g, 24 + i * 8, 62 + b, 7, 9, i % 2 ? steel : steelD); R(g, 24 + i * 8, 62 + b, 7, 1, steelL); }
+    R(g, 24, 58 + b, 32, 3, '#4a3020'); R(g, 38, 57 + b, 4, 5, '#c8a84a'); R(g, 39, 58 + b, 2, 3, '#7a5a1a');
+    // hanging chain & pouch
+    for (let i = 0; i < 5; i++) R(g, 54 + Math.sin(p + i) * 0.6, 60 + i * 3, 2, 2, '#8a8fa2'); R(g, 53, 74, 5, 4, '#4a3020');
+    // torso: rusty breastplate
+    poly(g, [24, 36 + b, 56, 36 + b, 54, 61 + b, 26, 61 + b], steel); poly(g, [24, 36 + b, 36, 36 + b, 36, 61 + b, 26, 61 + b], steelD);
+    R(g, 24, 36 + b, 32, 2, steelL); for (const [x, y] of [[28, 40], [51, 40], [29, 56], [50, 56]]) R(g, x, y + b, 2, 2, '#b8bccc');
+    for (const [x, y, wd] of [[30, 46, 5], [46, 52, 6], [28, 53, 4]]) R(g, x, y + b, wd, 2, rust);
+    // crescent crest on plate
+    g.strokeStyle = '#cfd4e0'; g.lineWidth = 2; g.beginPath(); g.arc(47, 45 + b, 5, 1.2, 5.1); g.stroke();
+    // broken chest hole: ribs + soul fire
+    poly(g, [33, 43 + b, 43, 42 + b, 45, 50 + b, 42, 58 + b, 34, 57 + b, 31, 50 + b], '#0b0f12');
+    g.globalAlpha = gl * 0.8; ell(g, 38, 50 + b, 5, 6, '#2fd8a0'); g.globalAlpha = 1;
+    for (let i = 0; i < 3; i++) R(g, 33 + (i % 2), 45 + i * 4 + b, 10 - (i % 2) * 2, 1, bone); R(g, 38, 44 + b, 1, 13, boneD);
+    // scarf (faded red favor) with fluttering tails
+    poly(g, [33, 34 + b, 47, 34 + b, 46, 39 + b, 34, 39 + b], '#8a2a34'); R(g, 33, 34 + b, 14, 1, '#b84a54');
+    poly(g, [36, 38 + b, 41, 39 + b, 30 + w2, 54 + b, 25 + w2, 53 + b], '#8a2a34'); poly(g, [41, 38 + b, 45, 38 + b, 50 + w2 * 0.6, 50 + b, 46 + w2 * 0.6, 52 + b], '#6a1e28');
+    // tabard front (torn)
+    poly(g, [33, 60 + b, 47, 60 + b, 49, 78 + w1 * 0.3, 44, 73, 40, 80, 36, 73, 31, 78], blue); R(g, 39, 62 + b, 2, 12, '#d8d0b0'); R(g, 36, 66 + b, 8, 2, '#d8d0b0');
+    // shield arm (left)
+    R(g, 14, 36 + b, 12, 7, steel); ell(g, 20, 38 + b, 9, 6, steel); R(g, 12, 36 + b, 4, 4, steelL); poly(g, [8, 36 + b, 12, 32 + b, 14, 38 + b], steelD);
+    R(g, 14, 42 + b, 6, 8, boneD); R(g, 15, 42 + b, 4, 8, steelD);
+    // dented moon shield
+    poly(g, [0, 40 + b, 22, 40 + b, 22, 58 + b, 11, 76 + b, 0, 58 + b], '#2a3a78'); poly(g, [0, 40 + b, 11, 40 + b, 11, 76 + b, 0, 58 + b], '#1c2858');
+    R(g, 0, 40 + b, 22, 2, steelL); R(g, 0, 40 + b, 2, 18, steelL); R(g, 20, 40 + b, 2, 18, steel);
+    g.strokeStyle = '#d8dcec'; g.lineWidth = 2.4; g.beginPath(); g.arc(12, 56 + b, 6, 0.9, 5.4); g.stroke(); line(g, 4, 46 + b, 9, 54 + b, '#10163a', 1); line(g, 15, 66 + b, 18, 60 + b, '#10163a', 1);
+    // right arm raised, holding banner-spear
+    ell(g, 58, 38 + b, 7, 6, steel); R(g, 54, 34 + b, 8, 2, steelL); R(g, 56, 41 + b, 6, 8, steelD); R(g, 60, 48 + b, 6, 8, boneD); R(g, 61, 54 + b, 6, 6, '#4a4e5a'); R(g, 61, 52 + b, 6, 2, steelL);
+    R(g, 64, 4, 2, 86, '#5a4030'); R(g, 64, 4, 1, 86, '#7a5a40'); poly(g, [63, 10, 67, 10, 65, 0], '#c8ccd8'); R(g, 64, 10, 2, 2, '#8a8fa2');
+    // pennant: swallowtail, tattered, with moon
+    const fl = Math.sin(p * 2) * 2.5, fl2 = Math.sin(p * 2 + 1.4) * 2;
+    poly(g, [66, 13, 78 + fl * 0.4, 14 + fl, 74 + fl, 20 + fl2, 79 + fl * 0.4, 28 + fl2, 66, 29], blue); poly(g, [66, 13, 73, 14, 73, 28, 66, 29], blueD);
+    g.strokeStyle = '#d8dcec'; g.lineWidth = 1.4; g.beginPath(); g.arc(70, 21, 3, 1.1, 5.3); g.stroke();
+    R(g, 75 + fl, 22 + fl2, 1, 1, '#000'); R(g, 72 + fl * 0.5, 26 + fl2, 1, 1, '#000');
+    // head: cracked kettle helm over skull
+    R(g, 34, 31 + b, 12, 5, boneD);
+    ell(g, 40, 23 + b, 9.5, 11, '#a8bcae'); ell(g, 36, 25 + b, 6, 9, '#8ea494');
+    R(g, 35, 33 + b, 10, 3, bone); for (let i = 0; i < 5; i++) R(g, 35 + i * 2, 33 + b, 1, 3, '#2a3a30');
+    ell(g, 40, 28 + b, 1.2, 2, '#1a2a22'); // nose hole
+    poly(g, [31, 14 + b, 40, 5 + b, 49, 14 + b, 48, 20 + b, 32, 20 + b], steel); poly(g, [31, 14 + b, 40, 5 + b, 40, 20 + b, 32, 20 + b], steelD);
+    R(g, 28, 18 + b, 24, 3, steel); R(g, 28, 18 + b, 24, 1, steelL); R(g, 29, 20 + b, 3, 12, steelD); R(g, 48, 20 + b, 3, 10, steel);
+    line(g, 38, 6 + b, 41, 14 + b, '#14161c', 1); line(g, 41, 14 + b, 39, 19 + b, '#14161c', 1);
+    R(g, 39, 4 + b, 2, 16, steelL); // nasal bar
+    poly(g, [29, 22 + b, 33, 22 + b, 31, 31 + b], '#2a2420'); poly(g, [47, 22 + b, 51, 22 + b, 50, 30 + b], '#2a2420'); // hair tufts
+    // glowing eyes + soul-fire trails
+    R(g, 34, 23 + b, 4, 4, '#0a1410'); R(g, 43, 23 + b, 4, 4, '#0a1410');
+    g.globalAlpha = gl; R(g, 35, 24 + b, 3, 3, teal); R(g, 43, 24 + b, 3, 3, teal); g.globalAlpha = 1;
+    for (const ex of [36, 45]) for (let i = 0; i < 3; i++) { const k = (t * 2 + i / 3) % 1; g.globalAlpha = (1 - k) * 0.7; ell(g, ex + Math.sin(p + i + ex) * 1.5, 22 + b - k * 14, 1.6 - k, 2.4 - k, teal); } g.globalAlpha = 1;
+    line(g, 44, 28 + b, 46, 33 + b, '#5a7060', 1);
+    // rising soul motes
+    for (let i = 0; i < 5; i++) { g.globalAlpha = 0.55; const k = (t + i / 5) % 1; circ(g, 12 + i * 14 + Math.sin(p + i) * 3, 88 - k * 62, 1.3, teal); } g.globalAlpha = 1;
   }],
   raven: [54, 46, 8, (g, t, p) => {
     const f = Math.sin(p * 2) * 8, y = Math.sin(p * 2 + 1.5) * 2;

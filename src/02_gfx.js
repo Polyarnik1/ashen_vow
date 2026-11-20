@@ -232,7 +232,7 @@ function drawHumanoid(o, dir, frame) {
         if (hs === 'long') { R(g, 3, hy + 4, 2, 9, hair); R(g, 12, hy + 4, 2, 9, hair); if (dir === 3) R(g, 4, hy + 8, 9, 5, hairD); }
         if (hs === 'braids') { R(g, 2, hy + 6, 2, 6, hair); R(g, 13, hy + 6, 2, 6, hair); R(g, 2, hy + 11, 2, 1, '#a04050'); R(g, 13, hy + 11, 2, 1, '#a04050'); }
         if (hs === 'bun') { R(g, 6, hy - 2, 5, 3, hair); }
-        if (o.veil) { const vc = o.veil; R(g, 3, hy - 1, 11, 3, vc); R(g, 2, hy + 2, 3, 12, vc); R(g, 12, hy + 2, 3, 12, vc); R(g, 2, hy + 2, 1, 12, shade(vc, -0.3)); if (dir === 3) R(g, 3, hy, 11, 13, vc); if (side) R(g, 3, hy, 6, 12, vc); }
+    if (o.veil) { const vc = o.veil; R(g, 3, hy - 1, 11, 3, vc); R(g, 2, hy + 2, 3, 12, vc); R(g, 12, hy + 2, 3, 12, vc); R(g, 2, hy + 2, 1, 12, shade(vc, -0.3)); if (dir === 3) R(g, 3, hy, 11, 13, vc); if (side) R(g, 3, hy, 6, 12, vc); }
       } else if (hs === 'hood') {
         const hc = o.hood || body;
         R(g, 3, hy - 1, 11, 4, hc); R(g, 2, hy + 1, 3, 10, hc); R(g, 12, hy + 1, 3, 10, hc); R(g, 2, hy + 1, 1, 10, shade(hc, -0.3));
@@ -265,7 +265,7 @@ const CHARDEF = {
   villagerC: { head: 'bald', tufts: '#e4e0da', body: '#5a5348', robe: true, skin: '#c4a284', beard: '#e4e0da', longbeard: true, wrinkles: true, stoop: true, cane: true, belt: '#3a3026', hair: '#e4e0da' },
   villagerD: { head: 'short', hair: '#8a6a3a', body: '#6a5a3a', belt: '#3a2a1a', legs: '#3a3428', skin: '#dcb898' },
   tomas: { head: 'short', hair: '#6a4a2a', body: '#6a6e80', armor: true, legs: '#3a3a48', tabard: '#3a4a7a', weapon: '#9a9aa8', skin: '#d8b898' },
-  tomasU: { head: 'short', hair: '#4a4038', body: '#4a4e5a', armor: true, legs: '#2a2a34', tabard: '#2a3048', weapon: '#7a7a88', skin: '#8fa894', eyes: '#9fffd0' },
+  tomasU: { head: 'helmet', steel: '#6a6e7c', eyes: '#9fffd0', plume: '#26327a', armor: true, body: '#5c606e', legs: '#2a2a34', boots: '#22222c', cape: '#26327a', glove: '#a8bcae', armColor: '#5c606e', tabard: '#26327a', belt: '#4a3020', weapon: '#c8ccd8' },
   gareth: { head: 'phelm', steel: '#c8b27a', eyes: '#ff4a3a', armor: true, body: '#8a7a50', legs: '#3a3428', cape: '#e8e0d0', weapon: '#d8d8e8', armColor: '#9a8a5a' },
   garethF: { head: 'phelm', steel: '#4a4440', eyes: '#ff3a2a', armor: true, body: '#3a3430', legs: '#2a2420', cape: '#5a1a1a', weapon: '#8a8a9a', armColor: '#4a4440' },
   king: { head: 'crown', skin: '#b8b8b0', eyes: '#e8f4ff', body: '#4a4a5a', robe: true, beard: '#d8d8d8', belt: '#8a8a96' },
@@ -484,6 +484,8 @@ function drawPortrait(o, mood = 0) {
       }
       default: ell(g, 24, 9, 13, 7, hair); R(g, 11, 9, 5, 10, hair); R(g, 32, 9, 5, 10, hair); poly(g, [14, 8, 30, 8, 22, 14], hair); R(g, 18, 5, 10, 1, shade(hair, 0.2));
     }
+    if (o.kettle) { const kc = o.kettle; poly(g, [11, 15, 14, 3, 24, -1, 34, 3, 37, 15], kc); poly(g, [11, 15, 14, 3, 24, -1, 24, 15], shade(kc, -0.3)); R(g, 6, 14, 36, 4, kc); R(g, 6, 14, 36, 1, shade(kc, 0.3)); R(g, 23, 0, 2, 16, shade(kc, 0.25)); line(g, 17, 3, 20, 13, '#14161c', 1); line(g, 30, 6, 28, 14, '#14161c', 1); R(g, 11, 18, 3, 12, shade(kc, -0.2)); R(g, 34, 18, 3, 12, shade(kc, -0.2)); }
+    if (o.scarf) { poly(g, [12, 36, 36, 36, 33, 44, 15, 44], o.scarf); R(g, 12, 36, 24, 2, shade(o.scarf, 0.25)); poly(g, [20, 42, 27, 42, 24, 48, 18, 48], shade(o.scarf, -0.25)); }
     if (o.veil) { const vc = o.veil; poly(g, [24, 0, 6, 14, 4, 46, 12, 46, 13, 20, 24, 8, 35, 20, 36, 46, 44, 46, 42, 14], vc); poly(g, [24, 0, 6, 14, 4, 46, 12, 46, 13, 20, 24, 8], shade(vc, -0.25)); R(g, 14, 14, 20, 2, vc); }
   }));
 }
@@ -500,7 +502,7 @@ const PORTDEF = {
   widow: { hs: 'long', hair: '#241a1c', veil: '#1e1a26', body: '#2c2634', skin: '#e4c8b2', lips: '#a85a62', lashes: true },
   elder: { hs: 'bald', hair: '#e8e4de', body: '#5a5348', skin: '#c4a284', beard: '#e8e4de', wrinkles: true },
   tomas: { hs: 'short', hair: '#6a4a2a', body: '#3a4a7a', skin: '#d8b898', armor: true },
-  tomasU: { hs: 'short', hair: '#4a4038', body: '#2a3048', skin: '#8fa894', eyes: '#9fffd0', glow: true, gaunt: true, armor: true },
+  tomasU: { hs: 'short', hair: '#2a2420', body: '#5c606e', skin: '#a8bcae', eyes: '#9fffd0', glow: true, gaunt: true, armor: true, kettle: '#5c606e', scarf: '#8a2a34', cape: '#26327a' },
   gareth: { kind: 'phelm', steel: '#c8b27a', eyes: '#ffd27a', armor: true, body: '#8a7a50', cape: '#e8e0d0' },
   garethF: { kind: 'phelm', steel: '#5a5450', eyes: '#ff3a2a', armor: true, body: '#3a3430', cape: '#5a1a1a', cracks: true },
   king: { hs: 'crown', skin: '#b8b8b0', eyes: '#e8f4ff', glow: true, gaunt: true, body: '#3a3a4a', beard: '#d8d8d8', hair: '#d8d8d8' },
