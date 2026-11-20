@@ -211,17 +211,61 @@ const MDRAW = {
     R(g, 23, 12 + y, 3, 3, '#0a0a10'); R(g, 28, 12 + y, 3, 3, '#0a0a10'); R(g, 24, 13 + y, 1, 1, '#ff3a3a'); R(g, 29, 13 + y, 1, 1, '#ff3a3a');
     R(g, 23, 36 + y, 1, 4, '#8a7a3a'); R(g, 30, 36 + y, 1, 4, '#8a7a3a');
   }],
-  blackguard: [52, 66, 8, (g, t, p) => {
-    const b = Math.round(Math.sin(p) * 1.2);
-    poly(g, [8, 26 + b, 4, 60, 20, 62, 26, 30 + b], '#3a1a1a');
-    R(g, 16, 46, 7, 16, '#2a2a30'); R(g, 28, 46, 7, 16, '#2a2a30'); R(g, 14, 60, 10, 4, '#18181c'); R(g, 27, 60, 10, 4, '#18181c');
-    poly(g, [13, 24 + b, 39, 24 + b, 37, 48, 15, 48], '#3a3a44'); poly(g, [13, 24 + b, 25, 24 + b, 25, 48, 15, 48], '#2a2a32');
-    R(g, 15, 38 + b, 22, 2, '#5a1a1a');
-    ell(g, 11, 26 + b, 7, 5, '#4a4a56'); ell(g, 41, 26 + b, 7, 5, '#4a4a56'); for (const x of [6, 46]) poly(g, [x, 22 + b, x + (x < 20 ? -2 : 2), 15 + b, x + (x < 20 ? 3 : -3), 22 + b], '#4a4a56');
-    R(g, 17, 6 + b, 18, 18, '#3e3e48'); R(g, 17, 6 + b, 5, 18, '#2e2e36'); poly(g, [17, 6 + b, 26, 1 + b, 35, 6 + b], '#3e3e48');
-    R(g, 19, 13 + b, 14, 2, '#0a0606'); const gl = 0.6 + 0.4 * Math.sin(p * 3); g.globalAlpha = gl; R(g, 24, 13 + b, 4, 2, '#ff2a1a'); g.globalAlpha = 1;
-    poly(g, [0, 30 + b, 12, 30 + b, 12, 46 + b, 6, 52 + b, 0, 46 + b], '#4a4450'); line(g, 2, 32 + b, 10, 48 + b, '#1a1a20', 1.5); R(g, 4, 34 + b, 2, 4, '#5a1a1a');
-    R(g, 42, 2 + b, 3, 44, '#6a6a78'); R(g, 42, 2 + b, 1, 44, '#9a9aa8'); poly(g, [40, 4 + b, 43.5, -4 + b, 47, 4 + b], '#8a8a98'); R(g, 38, 44 + b, 11, 2, '#3a2a1a');
+  blackguard: [68, 86, 12, (g, t, p) => {
+    const b = Math.round(Math.sin(p) * 1.3), w1 = Math.sin(p) * 3, w2 = Math.sin(p * 2 + 0.8) * 2.5, gl = 0.6 + 0.4 * Math.sin(p * 2);
+    const pl = '#3a3a46', plD = '#262630', plL = '#5e5e6e', blk = '#18181e', red = '#ff3a2a', redD = '#8a1a22', met = '#8a8a9a';
+    // ground mist of red light
+    g.globalAlpha = 0.22 * gl + 0.1; ell(g, 34, 82, 26, 5, red); g.globalAlpha = 1;
+    // tattered cape
+    poly(g, [20, 34 + b, 50, 34 + b, 60 + w1, 74, 55 + w2, 80, 50 + w1, 74, 44 + w2, 83, 38 + w1, 75, 32 + w2, 84, 26 + w1, 76, 20 + w2, 82, 14 + w1, 74, 10 + w2, 68], '#2a0e12');
+    poly(g, [26, 36 + b, 40, 36 + b, 38 + w1, 84, 30 + w2, 78, 22 + w1, 70], '#4a1418'); for (const x of [18, 48, 55]) R(g, x + w1 * 0.6, 52 + b, 1, 20, '#1a080a');
+    // legs: plate, knee spikes, sabatons
+    for (const lx of [23, 37]) {
+      R(g, lx, 62, 9, 16, plD); R(g, lx, 62, 3, 16, blk); R(g, lx + 6, 63, 1, 14, plL);
+      poly(g, [lx - 1, 63, lx + 4, 59, lx + 9, 63], met); R(g, lx - 1, 66, 11, 3, pl); R(g, lx - 1, 66, 11, 1, plL);
+      poly(g, [lx - 2, 79, lx + 13, 79, lx + 15, 84, lx - 2, 84], blk); R(g, lx - 2, 79, 14, 1, '#3a3a46');
+      g.globalAlpha = gl * 0.7; line(g, lx + 3, 69, lx + 5, 74, red, 1); g.globalAlpha = 1;
+    }
+    // faulds
+    poly(g, [20, 56 + b, 48, 56 + b, 51, 66, 17, 66], plD); for (let k = 0; k < 4; k++) { R(g, 19 + k * 8, 58 + b, 7, 8, k % 2 ? pl : plD); R(g, 19 + k * 8, 58 + b, 7, 1, plL); }
+    R(g, 19, 54 + b, 30, 3, '#3a1a1a'); R(g, 31, 53 + b, 6, 5, '#8a7a3a'); R(g, 32, 54 + b, 4, 3, '#5a4a1a');
+    // dangling chains
+    for (let k = 0; k < 6; k++) { R(g, 18 + Math.sin(p + k * 0.7) * 1, 56 + k * 3, 2, 2, met); R(g, 49 + Math.sin(p + k * 0.7 + 1) * 1, 56 + k * 3, 2, 2, met); }
+    // cuirass with oath inscription and glowing broken heart
+    poly(g, [18, 34 + b, 50, 34 + b, 48, 56 + b, 20, 56 + b], pl); poly(g, [18, 34 + b, 32, 34 + b, 32, 56 + b, 20, 56 + b], plD);
+    R(g, 18, 34 + b, 32, 2, plL); for (const [x, y] of [[22, 38], [46, 38], [23, 52], [45, 52]]) R(g, x, y + b, 2, 2, '#b8b8c8');
+    for (let k = 0; k < 4; k++) { R(g, 22 + k * 7, 49 + b, 4, 1, '#1a1a22'); R(g, 23 + k * 7, 51 + b, 3, 1, '#1a1a22'); }
+    g.globalAlpha = gl * 0.5; circ(g, 34, 43 + b, 8, red); g.globalAlpha = 1;
+    poly(g, [29, 40 + b, 34, 38 + b, 39, 40 + b, 38, 46 + b, 34, 50 + b, 30, 46 + b], '#0a0406');
+    g.globalAlpha = 0.5 + gl * 0.5; poly(g, [30, 41 + b, 34, 40 + b, 38, 41 + b, 37, 45 + b, 34, 48 + b, 31, 45 + b], red); g.globalAlpha = 1; line(g, 34, 39 + b, 33, 44 + b, '#0a0406', 1); line(g, 33, 44 + b, 35, 48 + b, '#0a0406', 1);
+    g.globalAlpha = gl * 0.8; line(g, 26, 36 + b, 30, 41 + b, red, 1); line(g, 41, 40 + b, 46, 35 + b, red, 1); line(g, 39, 47 + b, 43, 54 + b, red, 1); g.globalAlpha = 1;
+    // spiked pauldrons
+    for (const [cx, s] of [[16, -1], [52, 1]]) { ell(g, cx, 37 + b, 8, 6, pl); ell(g, cx + s * -1, 35 + b, 6, 3, plL); for (let k = 0; k < 3; k++) poly(g, [cx + s * (k * 3 - 2), 33 + b, cx + s * (k * 3 - 2) + s * 3, 26 + b - k * 2, cx + s * (k * 3 - 2) + s * 5, 34 + b], met); }
+    // shackled arms: left (shield), right (broken sword)
+    R(g, 8, 42 + b, 6, 10, plD); R(g, 7, 52 + b, 8, 4, met); R(g, 54, 42 + b, 6, 10, plD); R(g, 54, 51 + b, 8, 4, met);
+    for (let k = 0; k < 5; k++) R(g, 58 + Math.sin(p + k) * 1.2, 55 + b + k * 3, 2, 2, met);
+    // cracked oath shield with split crescent and chain wrap
+    poly(g, [0, 44 + b, 16, 44 + b, 16, 62 + b, 8, 76 + b, 0, 62 + b], '#4a4450'); poly(g, [0, 44 + b, 8, 44 + b, 8, 76 + b, 0, 62 + b], '#322e3a');
+    R(g, 0, 44 + b, 16, 2, plL); R(g, 0, 44 + b, 1, 18, plL);
+    g.strokeStyle = '#b8b0c0'; g.lineWidth = 1.6; g.beginPath(); g.arc(8, 59 + b, 4.5, 0.9, 5.4); g.stroke();
+    g.globalAlpha = gl; line(g, 2, 46 + b, 7, 56 + b, red, 1.2); line(g, 7, 56 + b, 6, 62 + b, red, 1.2); line(g, 6, 62 + b, 11, 70 + b, red, 1.2); g.globalAlpha = 1;
+    for (let k = 0; k < 9; k++) R(g, 1 + k * 1.7, 47 + b + k * 2.6, 2, 2, k % 2 ? met : '#6a6a7a');
+    // broken sword
+    R(g, 59, 48 + b, 4, 3, '#3a2a1a'); R(g, 56, 45 + b, 10, 2, '#6a5a2a'); R(g, 60, 49 + b, 2, 8, '#2a1a10');
+    R(g, 60, 22 + b, 3, 23, '#b8bccb'); R(g, 60, 22 + b, 1, 23, '#e0e4f0'); poly(g, [60, 22 + b, 63, 22 + b, 62, 17 + b, 61, 20 + b, 60, 16 + b], '#b8bccb');
+    g.save(); g.translate(62, 8); g.rotate(p * 0.5 - 0.5); poly(g, [-2, -6, 2, -6, 2, 2, -1, 6, -3, 1], '#d8dcea'); g.globalAlpha = 0.28 * gl + 0.1; circ(g, 0, 0, 4, red); g.restore(); g.globalAlpha = 1;
+    // horned great helm with red visor glow and torn plume
+    R(g, 28, 30 + b, 12, 5, plD);
+    poly(g, [24, 8 + b, 34, 3 + b, 44, 8 + b, 44, 30 + b, 24, 30 + b], '#3e3e4a'); poly(g, [24, 8 + b, 34, 3 + b, 34, 30 + b, 24, 30 + b], '#2a2a34');
+    R(g, 24, 8 + b, 20, 2, plL); R(g, 33, 3 + b, 2, 26, '#52525e');
+    poly(g, [24, 9 + b, 15, 6 + b, 11, -1 + b, 19, 3 + b, 23, 3 + b], '#2a2a34'); poly(g, [44, 9 + b, 53, 6 + b, 57, -1 + b, 49, 3 + b, 45, 3 + b], '#52525e');
+    const fl = Math.sin(p * 2) * 2; poly(g, [30, 4 + b, 36, 2 + b, 44 + fl, -2 + b, 48 + fl, 6 + b, 40, 8 + b], redD); poly(g, [34, 4 + b, 38, 3 + b, 44 + fl, 0 + b, 40, 7 + b], '#c0303a');
+    R(g, 26, 16 + b, 18, 3, '#0a0406'); g.globalAlpha = 0.6 + gl * 0.4; R(g, 27, 17 + b, 16, 1, red); R(g, 31, 16 + b, 8, 3, red); g.globalAlpha = 1;
+    for (let k = 0; k < 4; k++) { R(g, 27 + k * 3, 23 + b, 1, 4, '#0a0406'); R(g, 36 + k * 2, 23 + b, 1, 4, '#0a0406'); }
+    line(g, 28, 9 + b, 31, 15 + b, '#0a0406', 1); line(g, 41, 20 + b, 43, 28 + b, '#0a0406', 1);
+    for (let k = 0; k < 3; k++) { const q = (t * 2 + k / 3) % 1; g.globalAlpha = (1 - q) * 0.6; ell(g, 30 + k * 4 + Math.sin(p + k) * 1.5, 16 + b - q * 12, 1.4 - q * 0.6, 2.2 - q, red); } g.globalAlpha = 1;
+    // embers
+    for (let k = 0; k < 5; k++) { const q = (t + k / 5) % 1; g.globalAlpha = 0.6 * (1 - q); circ(g, 10 + k * 12 + Math.sin(p + k * 2) * 3, 82 - q * 56, 1.2, '#ff6a3a'); } g.globalAlpha = 1;
   }],
   gareth: [92, 104, 10, (g, t, p) => {
     const b = Math.round(Math.sin(p) * 1.5);
