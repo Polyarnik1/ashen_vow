@@ -635,6 +635,8 @@ function drawHumanoid(o, dir, frame) {
     if (o.skirt && o.robe) { R(g, 3, 19 + bob, 11, 3, body); R(g, 3, 19 + bob, 2, 3, bodyD); R(g, 3, 21 + bob, 11, 1, bodyD); R(g, 6, ty + 4, 5, 1, bodyD); }
     if (o.shawl) { R(g, 3, ty, 11, 3, o.shawl); R(g, 3, ty, 2, 3, shade(o.shawl, -0.25)); if (dir === 3) R(g, 3, ty, 11, 6, o.shawl); else R(g, 7, ty + 3, 3, 3, shade(o.shawl, -0.15)); }
     if (o.armor) { R(g, 5, ty + 1, 7, 1, bodyL); R(g, 8, ty + 2, 1, 3, bodyD); if (!side) { R(g, 3, ty, 3, 2, bodyL); R(g, 11, ty, 3, 2, bodyL); } }
+    if (o.suspenders && dir !== 3) { R(g, 5, ty, 1, 7 - sm, o.suspenders); R(g, 11, ty, 1, 7 - sm, o.suspenders); }
+    if (o.pack && dir !== 0) { R(g, side ? 2 : 3, ty - 1, side ? 5 : 11, 9 - sm, o.pack); R(g, side ? 2 : 3, ty - 1, side ? 5 : 11, 1, shade(o.pack, 0.25)); R(g, side ? 2 : 3, ty + 7 - sm, side ? 5 : 11, 1, shade(o.pack, -0.3)); if (dir === 3) R(g, 7, ty + 2, 3, 3, shade(o.pack, -0.2)); }
     if (o.belt) R(g, 4, ty + 5 - sm, 9, 1, o.belt);
     if (o.apron) { R(g, 5, ty + 1, 7, 8 - sm, o.apron); }
     if (o.tabard && dir === 0) { R(g, 6, ty + 1, 5, 7 - sm, o.tabard); R(g, 8, ty + 2, 1, 3, '#d8d0b0'); R(g, 7, ty + 3, 3, 1, '#d8d0b0'); }
@@ -666,6 +668,7 @@ function drawHumanoid(o, dir, frame) {
       else if (side) { if (o.sleep) R(g, 10, hy + 6, 2, 1, '#1a1420'); else R(g, 11, hy + 5, 1, 2, o.eyes || '#1a1420'); R(g, 13, hy + 6, 1, 1, skinD); }
       if (o.wrinkles && dir === 0) { R(g, 6, hy + 3, 5, 1, skinD); R(g, 5, hy + 8, 1, 2, skinD); R(g, 11, hy + 8, 1, 2, skinD); R(g, 6, hy + 4, 2, 1, '#e8e4dc'); R(g, 9, hy + 4, 2, 1, '#e8e4dc'); }
       if (o.lips && dir === 0) R(g, 7, hy + 8, 3, 1, o.lips);
+      if (o.glasses && dir === 0) { R(g, 5, hy + 4, 3, 3, o.glasses); R(g, 9, hy + 4, 3, 3, o.glasses); R(g, 6, hy + 5, 1, 1, '#e8f0ff'); R(g, 10, hy + 5, 1, 1, '#e8f0ff'); R(g, 8, hy + 5, 1, 1, o.glasses); }
       if (o.lashes && dir === 0) { R(g, 5, hy + 5, 1, 1, '#1a1420'); R(g, 11, hy + 5, 1, 1, '#1a1420'); }
       if (o.beard && dir !== 3) { R(g, side ? 8 : 5, hy + 7, side ? 5 : 7, 4, o.beard); R(g, side ? 9 : 6, hy + 10, side ? 3 : 5, 1, shade(o.beard, -0.2)); }
       if (o.longbeard && dir !== 3) R(g, side ? 9 : 6, hy + 11, side ? 3 : 5, 3, o.beard);
@@ -677,15 +680,25 @@ function drawHumanoid(o, dir, frame) {
         if (hs === 'long') { R(g, 3, hy + 4, 2, 9, hair); R(g, 12, hy + 4, 2, 9, hair); if (dir === 3) R(g, 4, hy + 8, 9, 5, hairD); }
         if (hs === 'braids') { R(g, 2, hy + 6, 2, 6, hair); R(g, 13, hy + 6, 2, 6, hair); R(g, 2, hy + 11, 2, 1, '#a04050'); R(g, 13, hy + 11, 2, 1, '#a04050'); }
         if (hs === 'bun') { R(g, 6, hy - 2, 5, 3, hair); }
+        if (o.ribbon && hs !== 'braids') { R(g, side ? 5 : 11, hy - 1, 3, 2, o.ribbon); }
+        if (o.ribbon && hs === 'braids') { R(g, 6, hy - 1, 5, 2, o.ribbon); R(g, 5, hy - 2, 2, 2, o.ribbon); R(g, 10, hy - 2, 2, 2, o.ribbon); }
     if (o.veil) { const vc = o.veil; R(g, 3, hy - 1, 11, 3, vc); R(g, 2, hy + 2, 3, 12, vc); R(g, 12, hy + 2, 3, 12, vc); R(g, 2, hy + 2, 1, 12, shade(vc, -0.3)); if (dir === 3) R(g, 3, hy, 11, 13, vc); if (side) R(g, 3, hy, 6, 12, vc); }
+      } else if (hs === 'kerchief' || hs === 'straw' || hs === 'toque' || hs === 'pony' || hs === 'bob' || hs === 'nightcap') {
+        const hc = o.hat || o.scarf || '#8a6a4a';
+        if (hs === 'kerchief') { R(g, 3, hy, 11, 4, hc); R(g, 3, hy, 2, 8, hc); R(g, 12, hy, 2, 8, hc); R(g, 5, hy + 1, 7, 1, shade(hc, 0.25)); if (dir === 3) R(g, 3, hy, 11, 10, hc); if (side) R(g, 3, hy, 6, 9, hc); R(g, 12, hy + 7, 3, 3, shade(hc, -0.2)); }
+        else if (hs === 'straw') { R(g, 3, hy + 1, 11, 3, hair); R(g, 3, hy + 1, 2, 7, hair); R(g, 12, hy + 1, 2, 5, hair); if (dir === 3) R(g, 3, hy, 11, 9, hair); R(g, 4, hy - 2, 9, 4, hc); R(g, 0, hy + 1, 17, 2, hc); R(g, 0, hy + 2, 17, 1, shade(hc, -0.3)); R(g, 4, hy, 9, 1, shade(hc, -0.3)); R(g, 6, hy - 2, 5, 1, shade(hc, 0.2)); }
+        else if (hs === 'toque') { R(g, 4, hy - 4, 9, 6, hc); R(g, 3, hy - 3, 11, 3, hc); R(g, 5, hy - 5, 7, 2, hc); R(g, 4, hy + 2, 9, 2, shade(hc, -0.2)); R(g, 3, hy + 3, 2, 3, hair); R(g, 12, hy + 3, 2, 3, hair); if (dir === 3) R(g, 4, hy + 2, 9, 7, hair); }
+        else if (hs === 'pony') { R(g, 3, hy, 11, 4, hair); R(g, 3, hy, 2, 6, hair); R(g, 12, hy, 2, 5, hair); R(g, 5, hy, 5, 1, shade(hair, 0.2)); if (dir === 3) { R(g, 3, hy, 11, 9, hair); R(g, 7, hy + 7, 3, 7, hair); R(g, 7, hy + 6, 3, 1, o.ribbon || '#a04050'); } else if (side) { R(g, 3, hy, 6, 8, hair); R(g, 2 - (frame % 2), hy + 4, 3, 8, hair); R(g, 3, hy + 4, 2, 1, o.ribbon || '#a04050'); } else { R(g, 1, hy + 3, 2, 8, hair); R(g, 1, hy + 3, 2, 1, o.ribbon || '#a04050'); } }
+        else if (hs === 'bob') { R(g, 3, hy, 11, 4, hair); R(g, 3, hy, 2, 10, hair); R(g, 12, hy, 2, 10, hair); R(g, 5, hy, 7, 1, shade(hair, 0.2)); R(g, 5, hy + 3, 7, 1, hair); if (dir === 3) R(g, 3, hy, 11, 10, hair); if (side) R(g, 3, hy, 6, 10, hair); }
+        else { R(g, 3, hy, 11, 4, hc); R(g, 3, hy, 2, 6, hc); R(g, 12, hy, 2, 6, hc); R(g, 3, hy + 3, 2, 3, hair); if (dir === 3) R(g, 3, hy, 11, 9, hc); R(g, 12, hy - 2, 4, 3, hc); R(g, 14, hy - 3, 2, 2, '#e8e0d0'); }
       } else if (hs === 'hood') {
         const hc = o.hood || body;
         R(g, 3, hy - 1, 11, 4, hc); R(g, 2, hy + 1, 3, 10, hc); R(g, 12, hy + 1, 3, 10, hc); R(g, 2, hy + 1, 1, 10, shade(hc, -0.3));
         if (dir === 3) R(g, 3, hy, 11, 11, hc);
         if (side) { R(g, 2, hy, 7, 11, hc); }
-      } else if (hs === 'cap') {
-        R(g, 3, hy, 11, 3, o.hat || '#4a3a2a'); R(g, 1, hy + 3, 15, 1, shade(o.hat || '#4a3a2a', -0.3)); if (dir === 3) R(g, 3, hy + 1, 11, 7, hair);
-      } else if (hs === 'bald') { if (o.tufts) { R(g, 3, hy + 3, 2, 6, o.tufts); R(g, 12, hy + 3, 2, 6, o.tufts); R(g, 4, hy + 2, 3, 2, o.tufts); R(g, 10, hy + 2, 3, 2, o.tufts); } R(g, 5, hy + 1, 3, 1, shade(skin, 0.25)); if (dir === 3) R(g, 4, hy + 1, 9, 9, skinD); }
+      } else if (hs === 'cap' || hs === 'flatcap') {
+        R(g, 3, hy, 11, 3, o.hat || '#4a3a2a'); R(g, 1, hy + 3, 15, 1, shade(o.hat || '#4a3a2a', -0.3)); if (o.feather) { R(g, 12, hy - 3, 2, 4, o.feather); R(g, 13, hy - 4, 1, 2, shade(o.feather, 0.3)); } if (dir === 3) R(g, 3, hy + 1, 11, 7, hair);
+      } else if (hs === 'bald') { if (o.headband) R(g, 4, hy + 2, 9, 2, o.headband); if (o.tufts) { R(g, 3, hy + 3, 2, 6, o.tufts); R(g, 12, hy + 3, 2, 6, o.tufts); R(g, 4, hy + 2, 3, 2, o.tufts); R(g, 10, hy + 2, 3, 2, o.tufts); } R(g, 5, hy + 1, 3, 1, shade(skin, 0.25)); if (dir === 3) R(g, 4, hy + 1, 9, 9, skinD); }
       else if (hs === 'crown') {
         R(g, 3, hy, 11, 3, '#8a8a96'); for (let i = 0; i < 4; i++) R(g, 3 + i * 3, hy - 2, 2, 2, '#8a8a96'); R(g, 7, hy + 1, 2, 1, '#9fd0ff');
         if (dir === 3) R(g, 4, hy + 3, 9, 7, '#d0d0d0');
@@ -700,25 +713,28 @@ function makeChar(name, o) { const set = []; for (let d = 0; d < 4; d++) { set.p
 const CHARDEF = {
   hero: { head: 'helmet', steel: '#b4bacb', eyes: '#8fd8ff', plume: '#a3242f', armor: true, body: '#8a90a6', legs: '#4a4e60', boots: '#22222c', cape: '#7a1c26', glove: '#5e6274', armColor: '#7a8096', belt: '#3a2a1e', weapon: '#c9ccd8' },
   ansel: { head: 'hood', hood: '#4a4558', body: '#4a4558', robe: true, skin: '#cfae92', beard: '#d8d4cc', belt: '#8a6a3a' },
-  mirra: { head: 'bun', hair: '#a8a4ac', body: '#4a3a52', robe: true, skin: '#d1ad94', belt: '#6a5a3a' },
-  guido: { head: 'cap', hat: '#5a2a3a', hair: '#2a1a14', mustache: '#2a1a14', body: '#6a4a2a', belt: '#2a1a10', skin: '#d8a888', legs: '#3a2a22' },
-  bram: { head: 'bald', skin: '#c49478', beard: '#6a3a1e', body: '#5a4a44', apron: '#3a2a1e', armColor: '#c49478', legs: '#2a2420' },
-  lina: { head: 'braids', hair: '#a0642a', body: '#6a3a4a', robe: true, skin: '#e2bea2', small: true, blush: true },
+  mirra: { head: 'bun', hair: '#b8b4bc', body: '#5a4268', robe: true, skirt: true, shawl: '#8a6a9a', skin: '#d1ad94', wrinkles: true, belt: '#6a5a3a', cane: true, glasses: '#3a3238' },
+  guido: { head: 'cap', hat: '#5a2a3a', feather: '#d8c84a', hair: '#2a1a14', mustache: '#2a1a14', body: '#7a4a2a', belt: '#2a1a10', skin: '#d8a888', legs: '#3a2a22', pack: '#6a4a2a', suspenders: '#2a1a10' },
+  bram: { head: 'bald', headband: '#8a2a2a', skin: '#c49478', beard: '#6a3a1e', body: '#5a4a44', apron: '#3a2a1e', armColor: '#c49478', legs: '#2a2420' },
+  lina: { head: 'braids', hair: '#a0642a', ribbon: '#d84a5a', body: '#6a3a4a', robe: true, skirt: true, skin: '#e2bea2', small: true, blush: true, lashes: true },
   hosk: { head: 'helmet', steel: '#7a7e8a', body: '#5a4a3a', armor: true, legs: '#3a3030', weapon: '#9a9aa8', tabard: '#3a4a6a' },
-  villagerA: { head: 'short', hair: '#4a3420', body: '#4a5a4a', belt: '#2a2010', legs: '#2a2a2a' },
+  villagerA: { head: 'straw', hat: '#c8a85a', hair: '#4a3420', body: '#6a5a3a', suspenders: '#3a2a1a', belt: '#2a2010', legs: '#3a3a2a', skin: '#d0a888', mustache: '#4a3420' },
   villagerB: { head: 'long', hair: '#2a1e18', body: '#2c2634', robe: true, skirt: true, shawl: '#5a4a6a', veil: '#1e1a26', lips: '#a85a62', lashes: true, skin: '#e4c8b2' },
   villagerC: { head: 'bald', tufts: '#e4e0da', body: '#5a5348', robe: true, skin: '#c4a284', beard: '#e4e0da', longbeard: true, wrinkles: true, stoop: true, cane: true, belt: '#3a3026', hair: '#e4e0da' },
-  villagerD: { head: 'short', hair: '#8a6a3a', body: '#6a5a3a', belt: '#3a2a1a', legs: '#3a3428', skin: '#dcb898' },
+  villagerD: { head: 'flatcap', hat: '#5a6a4a', hair: '#8a6a3a', body: '#8a7a5a', shawl: '#ece6d8', beard: '#8a6a3a', cane: true, legs: '#5a4a38', skin: '#dcb898', belt: '#3a2a1a' },
   tomas: { head: 'short', hair: '#6a4a2a', body: '#6a6e80', armor: true, legs: '#3a3a48', tabard: '#3a4a7a', weapon: '#9a9aa8', skin: '#d8b898' },
   tomasU: { head: 'helmet', steel: '#6a6e7c', eyes: '#9fffd0', plume: '#26327a', armor: true, body: '#5c606e', legs: '#2a2a34', boots: '#22222c', cape: '#26327a', glove: '#a8bcae', armColor: '#5c606e', tabard: '#26327a', belt: '#4a3020', weapon: '#c8ccd8' },
   gareth: { head: 'phelm', steel: '#c8b27a', eyes: '#ff4a3a', armor: true, body: '#8a7a50', legs: '#3a3428', cape: '#e8e0d0', weapon: '#d8d8e8', armColor: '#9a8a5a' },
   garethF: { head: 'phelm', steel: '#4a4440', eyes: '#ff3a2a', armor: true, body: '#3a3430', legs: '#2a2420', cape: '#5a1a1a', weapon: '#8a8a9a', armColor: '#4a4440' },
   king: { head: 'crown', skin: '#b8b8b0', eyes: '#e8f4ff', body: '#4a4a5a', robe: true, beard: '#d8d8d8', belt: '#8a8a96' },
-  sleeper1: { head: 'short', hair: '#5a4a3a', body: '#5a6070', sleep: true, legs: '#3a3a44', skin: '#b8b0a8' },
-  sleeper2: { head: 'long', hair: '#7a6040', body: '#6a5a6a', robe: true, sleep: true, skin: '#bab0a8' },
-  sleeper3: { head: 'braids', hair: '#3a2a20', body: '#5a6a6a', robe: true, small: true, sleep: true, skin: '#c0b8ae' },
-  sleeper4: { head: 'cap', hat: '#3a3a4a', hair: '#555', body: '#4a4a3a', sleep: true, skin: '#b8b0a8', beard: '#9a9a9a' },
-  ghostgirl: { head: 'long', hair: '#c8d8f0', body: '#9ab0d8', robe: true, small: true, skin: '#d8e4f4', eyes: '#3a5a9a' },
+  sleeper1: { head: 'short', hair: '#3a3a40', body: '#5a6070', armor: true, tabard: '#3a4a6a', legs: '#3a3a44', sleep: true, skin: '#c0a898', mustache: '#3a3a40' },
+  sleeper2: { head: 'long', hair: '#7a5030', body: '#e6dee8', robe: true, skirt: true, shawl: '#a05a6a', sleep: true, skin: '#e0c0a8', lips: '#b86a72' },
+  sleeper3: { head: 'braids', hair: '#c89a4a', ribbon: '#e86a8a', body: '#c8d8f0', robe: true, skirt: true, small: true, sleep: true, skin: '#e8c8b0', blush: true },
+  sleeper4: { head: 'toque', hat: '#f0ece0', hair: '#8a8a8a', mustache: '#9a9a9a', body: '#e0d8c8', apron: '#f4f0e4', legs: '#4a4038', skin: '#dcb090', sleep: true },
+  sleeperF: { head: 'straw', hat: '#b8985a', hair: '#aaaaa0', beard: '#c8c4bc', body: '#5a5a48', belt: '#2a2a20', suspenders: '#2a2a20', legs: '#3a3a30', sleep: true, skin: '#c0a890', wrinkles: true },
+  sleeperW: { head: 'pony', hair: '#2a1e18', ribbon: '#8a3a4a', body: '#7a5a6a', robe: true, skirt: true, sleep: true, skin: '#d8bca8', lips: '#a05a62' },
+  garethV: { head: 'short', hair: '#b8b4b0', beard: '#b8b4b0', body: '#8a7a50', armor: true, legs: '#3a3428', cape: '#e8e0d0', weapon: '#d8d8e8', armColor: '#9a8a5a', skin: '#d0b090', wrinkles: true, eyes: '#3a4a6a', belt: '#5a4a2a' },
+  ghostgirl: { head: 'long', hair: '#c8d8f0', ribbon: '#9ab0d8', body: '#9ab0d8', robe: true, skirt: true, small: true, skin: '#d8e4f4', eyes: '#3a5a9a', lashes: true },
 };
 
 // ================= OBJECT SPRITES =================
@@ -839,7 +855,15 @@ function makeHouse(w, h, o = {}) { // w,h in tiles; roof color
     const wins = o.windows || [0.22, 0.78];
     for (const fx of wins) { const wx = Math.floor(pw * fx) - 4; R(g, wx, wallTop + 12, 8, 7, '#1a120c'); R(g, wx + 1, wallTop + 13, 6, 5, o.dark ? '#1a1e2a' : '#ffb85a'); R(g, wx + 4, wallTop + 13, 1, 5, '#1a120c'); R(g, wx + 1, wallTop + 15, 6, 1, '#1a120c'); }
     // chimney
-    if (o.chimney) { R(g, pw * 0.72, 4, 6, 12, '#3a3434'); R(g, pw * 0.72 - 1, 3, 8, 2, '#2a2626'); }
+    if (o.chimney) {
+      // chimney sits ON the roof slope: bottom sinks into the roof, top rises above it
+      const cw = 7, cx = Math.floor(pw * 0.68), surf = x => (Math.abs(x - pw / 2) / (pw / 2)) * (wallTop + 2);
+      const yl = Math.floor(surf(cx)), yr = Math.floor(surf(cx + cw)) + 2, yt = Math.max(2, yl - 11);
+      R(g, cx, yt, cw, yr - yt, '#4a403c'); R(g, cx, yt, 2, yr - yt, '#322a28'); R(g, cx + cw - 1, yt, 1, yr - yt, '#5e524c');
+      for (let y = yt + 3; y < yr - 1; y += 3) { R(g, cx, y, cw, 1, '#2a2422'); R(g, cx + ((y / 3 | 0) % 2 ? 2 : 4), y - 2, 1, 2, '#2a2422'); }
+      R(g, cx - 1, yt - 2, cw + 2, 3, '#2a2626'); R(g, cx - 1, yt - 2, cw + 2, 1, '#5e524c'); R(g, cx + 1, yt - 1, cw - 2, 1, '#0c0a0a');
+      R(g, cx, yr - 1, cw, 1, '#1a1414');
+    }
   }));
 }
 
@@ -930,6 +954,9 @@ function drawPortrait(o, mood = 0) {
       }
       default: ell(g, 24, 9, 13, 7, hair); R(g, 11, 9, 5, 10, hair); R(g, 32, 9, 5, 10, hair); poly(g, [14, 8, 30, 8, 22, 14], hair); R(g, 18, 5, 10, 1, shade(hair, 0.2));
     }
+    if (o.straw) { const sc = o.straw; ell(g, 24, 9, 12, 7, sc); R(g, 4, 11, 40, 3, sc); R(g, 4, 13, 40, 1, shade(sc, -0.3)); R(g, 11, 9, 26, 1, shade(sc, -0.35)); R(g, 16, 4, 14, 1, shade(sc, 0.25)); }
+    if (o.toque) { const tc = o.toque; ell(g, 24, 6, 14, 9, tc); ell(g, 14, 8, 7, 7, tc); ell(g, 34, 8, 7, 7, tc); R(g, 10, 12, 28, 6, tc); R(g, 10, 16, 28, 2, shade(tc, -0.2)); R(g, 20, 3, 8, 1, shade(tc, -0.15)); }
+    if (o.ribbon && o.hs !== 'braids') { poly(g, [33, 9, 41, 5, 41, 13], o.ribbon); poly(g, [33, 9, 25, 5, 25, 13], shade(o.ribbon, -0.2)); R(g, 31, 8, 4, 3, shade(o.ribbon, 0.2)); }
     if (o.kettle) { const kc = o.kettle; poly(g, [11, 15, 14, 3, 24, -1, 34, 3, 37, 15], kc); poly(g, [11, 15, 14, 3, 24, -1, 24, 15], shade(kc, -0.3)); R(g, 6, 14, 36, 4, kc); R(g, 6, 14, 36, 1, shade(kc, 0.3)); R(g, 23, 0, 2, 16, shade(kc, 0.25)); line(g, 17, 3, 20, 13, '#14161c', 1); line(g, 30, 6, 28, 14, '#14161c', 1); R(g, 11, 18, 3, 12, shade(kc, -0.2)); R(g, 34, 18, 3, 12, shade(kc, -0.2)); }
     if (o.scarf) { poly(g, [12, 36, 36, 36, 33, 44, 15, 44], o.scarf); R(g, 12, 36, 24, 2, shade(o.scarf, 0.25)); poly(g, [20, 42, 27, 42, 24, 48, 18, 48], shade(o.scarf, -0.25)); }
     if (o.veil) { const vc = o.veil; poly(g, [24, 0, 6, 14, 4, 46, 12, 46, 13, 20, 24, 8, 35, 20, 36, 46, 44, 46, 42, 14], vc); poly(g, [24, 0, 6, 14, 4, 46, 12, 46, 13, 20, 24, 8], shade(vc, -0.25)); R(g, 14, 14, 20, 2, vc); }
@@ -945,6 +972,12 @@ const PORTDEF = {
   lina: { hs: 'braids', hair: '#a0642a', body: '#6a3a4a', skin: '#e2bea2' },
   hosk: { kind: 'helmet', steel: '#7a7e8a', body: '#3a4a6a', armor: true },
   villager: { hs: 'short', hair: '#4a3420', body: '#4a5a4a', skin: '#d6b296' },
+  farmer: { hs: 'short', hair: '#4a3420', body: '#6a5a3a', skin: '#d0a888', straw: '#c8a85a', mustache: '#4a3420' },
+  shepherd: { hs: 'cap', hat: '#5a6a4a', hair: '#8a6a3a', body: '#8a7a5a', skin: '#dcb898', beard: '#8a6a3a' },
+  baker: { hs: 'short', hair: '#8a8a8a', body: '#e0d8c8', skin: '#dcb090', toque: '#f0ece0', mustache: '#9a9a9a', sleep: true },
+  mother: { hs: 'long', hair: '#7a5030', body: '#e6dee8', skin: '#e0c0a8', lips: '#b86a72', sleep: true, ribbon: '#a05a6a' },
+  girlS: { hs: 'braids', hair: '#c89a4a', body: '#c8d8f0', skin: '#e8c8b0', ribbon: '#e86a8a', lashes: true, sleep: true },
+  garethV: { hs: 'short', hair: '#b8b4b0', beard: '#b8b4b0', body: '#8a7a50', skin: '#d0b090', armor: true, cape: '#e8e0d0', wrinkles: true, eyes: '#3a4a6a' },
   widow: { hs: 'long', hair: '#241a1c', veil: '#1e1a26', body: '#2c2634', skin: '#e4c8b2', lips: '#a85a62', lashes: true },
   elder: { hs: 'bald', hair: '#e8e4de', body: '#5a5348', skin: '#c4a284', beard: '#e8e4de', wrinkles: true },
   tomas: { hs: 'short', hair: '#6a4a2a', body: '#3a4a7a', skin: '#d8b898', armor: true },
@@ -1545,7 +1578,7 @@ function drawFx() {
 }
 
 // ================= DIALOG =================
-const VOICE = { hero: 0.8, ivel: 1.5, ansel: 0.7, mirra: 0.9, guido: 1.1, bram: 0.6, lina: 1.6, hosk: 0.75, tomas: 1.0, tomasU: 0.85, gareth: 0.65, garethF: 0.55, king: 0.45, ghost: 1.4, sleeper: 1.0, villager: 1.0 };
+const VOICE = { hero: 0.8, ivel: 1.5, ansel: 0.7, mirra: 0.9, guido: 1.1, bram: 0.6, lina: 1.6, hosk: 0.75, tomas: 1.0, tomasU: 0.85, gareth: 0.65, garethF: 0.55, king: 0.45, ghost: 1.4, sleeper: 1.0, villager: 1.0, farmer: 0.9, shepherd: 0.85, garethV: 0.65, baker: 0.7, mother: 1.25, girlS: 1.6, widow: 1.25, elder: 0.6 };
 const Dlg = { open: false, name: null, port: null, mood: 0, lines: [], n: 0, total: 0, done: false, res: null, pos: 'bottom', voice: 1, speed: 38, shake: 0, auto: 0 };
 function say(name, txt, o = {}) {
   return new Promise(res => {
@@ -3299,7 +3332,7 @@ const MAPS = {};
     { type: 'npc', id: 'vB', x: 33, y: 27, char: 'villagerB', talk: 'vB', wander: true },
     { type: 'npc', id: 'vC', x: 27, y: 9, char: 'villagerC', talk: 'vC' },
     { type: 'npc', id: 'vD', x: 38, y: 19, char: 'villagerD', talk: 'vD', wander: true },
-    { type: 'npc', id: 'gareth_v', x: 25, y: 11, char: 'gareth', talk: 'garethV', cond: () => F('gareth_spared') },
+    { type: 'npc', id: 'gareth_v', x: 25, y: 11, char: 'garethV', talk: 'garethV', cond: () => F('gareth_spared') },
     { type: 'shrine', id: 's3', x: 25, y: 16 },
     { type: 'stash', id: 'st3', x: 27, y: 17 },
     { type: 'sign', x: 21, y: 33, text: 'ТЕРНОВАЯ СТЕНА. Путник, шипы — для мёртвых, а не для тебя.' },
@@ -3481,8 +3514,8 @@ const MAPS = {};
     { type: 'npc', id: 'mother', x: 39, y: 11, char: 'sleeper2', talk: 'voice2', sleeper: true, fixed: true },
     { type: 'npc', id: 'girl', x: 24, y: 15, char: 'sleeper3', talk: 'voice3', sleeper: true, fixed: true },
     { type: 'npc', id: 'sl1', x: 18, y: 9, char: 'sleeper1', talk: 'sleeper', sleeper: true, fixed: true },
-    { type: 'npc', id: 'sl2', x: 30, y: 30, char: 'sleeper1', talk: 'sleeper', sleeper: true, fixed: true, dir: 1 },
-    { type: 'npc', id: 'sl3', x: 11, y: 12, char: 'sleeper2', talk: 'sleeper', sleeper: true, fixed: true, dir: 2 },
+    { type: 'npc', id: 'sl2', x: 30, y: 30, char: 'sleeperF', talk: 'sleeper', sleeper: true, fixed: true, dir: 1 },
+    { type: 'npc', id: 'sl3', x: 11, y: 12, char: 'sleeperW', talk: 'sleeper', sleeper: true, fixed: true, dir: 2 },
     { type: 'npc', id: 'ela', x: 23, y: 30, char: 'ghostgirl', talk: 'ela', ghostly: true, float: true, light: [26, 'moon'] },
     { type: 'shrine', id: 's7', x: 26, y: 33 },
     { type: 'stash', id: 'st7', x: 28, y: 33 },
@@ -4029,11 +4062,11 @@ const TALK = {
     if (!F('eastgate')) { await Ho('Стой. Восточные ворота закрыты. Приказ старейшины Мирры.'); await Ho('Её дом — на северо-западе, с дымящей трубой.'); return; }
     await Ho(pick(['Проходи, рыцарь. Да хранит тебя... что там у вас хранит.', 'Собор — прямо по дороге. Не заблудишься: иди на звон.', 'Если что — кричи. Я не приду, но хоть буду знать.']));
   },
-  async vA() { await say('Крестьянин', F('bishop_done') ? 'Ночью было тихо! Ни одного мертвеца! Я даже выспался, представляешь?' : 'Говорят, сто лет назад король уснул под озером. А вместе с ним — всё его королевство.', { p: 'villager' }); },
+  async vA() { await say('Крестьянин', F('bishop_done') ? 'Ночью было тихо! Ни одного мертвеца! Я даже выспался, представляешь?' : 'Говорят, сто лет назад король уснул под озером. А вместе с ним — всё его королевство.', { p: 'farmer' }); },
   async vB() { await say('Вдова', F('bishop_done') ? 'Спасибо тебе. Теперь мой муж... спит спокойно. Я это чувствую.' : 'Мой муж ушёл к собору и не вернулся. Если увидишь его там... Нет. Не говори мне.', { p: 'widow' }); },
   async vC() { await say('Старик', F('tomas_done') ? 'Трое героев: два рыцаря и жрица. Один погиб, второй сбежал, а жрица... Жрица стала луной, так говорила бабка.' : 'Орден Бледной Луны... Помню сказки бабки. Трое героев запечатали короля. Двое рыцарей и жрица.', { p: 'elder' }); },
-  async vD() { await say('Пастух', pick(['Ты не видел мою козу? Белую такую. Она уже сто лет как... ладно, неважно.', 'Кузнец Брам ворчит, но кует лучше всех в округе.', 'Не ходи к кладбищу ночью. Хотя для тебя, наверное, это как домой сходить.']), { p: 'villager' }); },
-  async garethV() { await say('Гарет', pick(['Охраняю живых, брат. Иди — и вернись, если сможешь.', 'Мирра ворчит, что я слишком громко точу меч. Это хорошо. Значит, она спит.']), { p: 'gareth' }); },
+  async vD() { await say('Пастух', pick(['Ты не видел мою козу? Белую такую. Она уже сто лет как... ладно, неважно.', 'Кузнец Брам ворчит, но кует лучше всех в округе.', 'Не ходи к кладбищу ночью. Хотя для тебя, наверное, это как домой сходить.']), { p: 'shepherd' }); },
+  async garethV() { await say('Гарет', pick(['Охраняю живых, брат. Иди — и вернись, если сможешь.', 'Мирра ворчит, что я слишком громко точу меч. Это хорошо. Значит, она спит.']), { p: 'garethV' }); },
   async bishop() { await STORY.bishopFight(); },
   async tomasB() { await STORY.tomasFight(); },
   async garethB() { await STORY.garethFight(); },
@@ -4056,19 +4089,19 @@ const TALK = {
   async voice1() {
     if (F('voice1')) { await nar('Пекарь мирно посапывает. От него пахнет хлебом, которого нет.'); return; }
     await nar('Пекарь шевелит губами во сне. Ты наклоняешься ближе...');
-    await say('Сон пекаря', '«...хлеб остывает. Целая печь хлеба. Кто его съест, если все спят?.. Я так хочу, чтобы кто-нибудь его съел...»', { p: 'sleeper', col: '#c8c8ff' });
+    await say('Сон пекаря', '«...хлеб остывает. Целая печь хлеба. Кто его съест, если все спят?.. Я так хочу, чтобы кто-нибудь его съел...»', { p: 'baker', col: '#c8c8ff' });
     setF('voice1'); G.voices++; sfx('chime'); note(`Услышан сон (${G.voices}/3)`);
   },
   async voice2() {
     if (F('voice2')) { await nar('Анна прижимает руки к груди, будто качает кого-то.'); return; }
     await nar('Женщина стоит с протянутыми руками, словно держит младенца.');
-    await say('Сон матери', '«...моя дочь так и не научилась ходить. Сто лет она спит в колыбели. Я хочу услышать, как она плачет. Хоть раз...»', { p: 'sleeper', col: '#c8c8ff' });
+    await say('Сон матери', '«...моя дочь так и не научилась ходить. Сто лет она спит в колыбели. Я хочу услышать, как она плачет. Хоть раз...»', { p: 'mother', col: '#c8c8ff' });
     setF('voice2'); G.voices++; sfx('chime'); note(`Услышан сон (${G.voices}/3)`);
   },
   async voice3() {
     if (F('voice3')) { await nar('Эла спит, улыбаясь. Ей снится прогулка.'); return; }
     await nar('Маленькая девочка спит, прислонившись к колодцу. Это настоящая Эла.');
-    await say('Сон девочки', '«...я хочу увидеть утро. Хоть одно. Мама говорила, что утром небо розовое. Пожалуйста...»', { p: 'sleeper', col: '#c8c8ff' });
+    await say('Сон девочки', '«...я хочу увидеть утро. Хоть одно. Мама говорила, что утром небо розовое. Пожалуйста...»', { p: 'girlS', col: '#c8c8ff' });
     setF('voice3'); G.voices++; sfx('chime'); note(`Услышан сон (${G.voices}/3)`);
   },
   async sleeper() { await nar(pick(['Спящий бормочет: «...ещё пять минуточек...»', 'Спящий улыбается. Ему снится что-то хорошее.', 'Спящий вздрагивает. Ему снится чума.', 'Спящий что-то шепчет о короле. Слов не разобрать.'])); },

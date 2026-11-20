@@ -102,7 +102,7 @@ function drawFx() {
 }
 
 // ================= DIALOG =================
-const VOICE = { hero: 0.8, ivel: 1.5, ansel: 0.7, mirra: 0.9, guido: 1.1, bram: 0.6, lina: 1.6, hosk: 0.75, tomas: 1.0, tomasU: 0.85, gareth: 0.65, garethF: 0.55, king: 0.45, ghost: 1.4, sleeper: 1.0, villager: 1.0 };
+const VOICE = { hero: 0.8, ivel: 1.5, ansel: 0.7, mirra: 0.9, guido: 1.1, bram: 0.6, lina: 1.6, hosk: 0.75, tomas: 1.0, tomasU: 0.85, gareth: 0.65, garethF: 0.55, king: 0.45, ghost: 1.4, sleeper: 1.0, villager: 1.0, farmer: 0.9, shepherd: 0.85, garethV: 0.65, baker: 0.7, mother: 1.25, girlS: 1.6, widow: 1.25, elder: 0.6 };
 const Dlg = { open: false, name: null, port: null, mood: 0, lines: [], n: 0, total: 0, done: false, res: null, pos: 'bottom', voice: 1, speed: 38, shake: 0, auto: 0 };
 function say(name, txt, o = {}) {
   return new Promise(res => {
