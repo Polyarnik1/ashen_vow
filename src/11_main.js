@@ -393,7 +393,7 @@ function render() {
   else if (Game.scene === 'world') { drawWorldUI(); if (Menu.open) drawMenu(); }
   else if (Game.scene === 'battle') drawBattleUI();
   else if (Game.scene === 'cine' && Game.cine === 'credits') drawCredits();
-  else if (Game.scene === 'gameover') { uiT(); ctx.globalAlpha = Math.min(1, Game.goT / 2); text('СВЕЧА ОБЕТА ПОГАСЛА', W / 2, 24, '#c8c0d8', 12, 'center', { w: 600 }); ctx.globalAlpha = 1; }
+  else if (Game.scene === 'gameover') { uiT(); ctx.globalAlpha = Math.min(1, Game.goT / 2); text('СВЕЧА ОБЕТА ПОГАСЛА', W / 2, 24, '#c8c0d8', 12, 'center', { w: 600 }); if (Game.goMsg && Game.goT > 1.5) { ctx.globalAlpha = Math.min(1, (Game.goT - 1.5) / 1.2); wrap(Game.goMsg, 270, 8).forEach((ln, i) => text(ln, W / 2, 132 + i * 11, '#ffd75e', 8, 'center')); } ctx.globalAlpha = 1; }
   drawDialog(); drawChoice(); drawFx();
 }
 function frame(ts) {

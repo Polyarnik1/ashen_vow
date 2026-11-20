@@ -2548,10 +2548,27 @@ async function endBattle(r) {
   await fade(0, 0.4);
   const res = B.res; res(r);
 }
+const DEATH_MSGS = {
+  any: ['Ещё не конец, Ардан.', 'Встань. Пепел помнит, как подниматься.', 'Голубой огонёк всё ещё горит. Не сдавайся.', 'Ты не можешь сдаться сейчас. Вальдмор ждёт.', 'Боль — значит, ты всё ещё здесь. Поднимайся.', 'Свеча гаснет не навсегда. Её можно зажечь снова.', 'Каждый рыцарь падал. Важно, что он делал потом.', 'Прислушайся: где-то далеко кто-то верит в тебя.'],
+  ivel: ['«Ардан! Слышишь меня? Держись, я рядом!»', '«Не смей гаснуть! Я ещё не договорила!»', '«Вставай, пепельный рыцарь. Я зажгу тебе свет».'],
+  king: ['Даже Король когда-то был рыцарем. Не отступай.', 'Сто лет люди ждут утра. Ещё одна попытка — не так уж много.'],
+  bishop: ['Даже ржавый колокол звонит — стоит лишь ударить ещё раз.'],
+  tomas: ['Тот, кто лежит в склепе, тоже мечтал о покое. Дай ему его.'],
+  gareth: ['Гарет ждёт, что ты вернёшься. Не заставляй его ждать ещё век.'],
+  many: ['Падать — не стыдно. Стыдно — не подняться. А ты поднимаешься.', 'Совет: зажми Shift — сердце станет двигаться медленнее и точнее.', 'Совет: парирование на Enter даёт Духа. Не бойся подпустить ближе.'],
+};
+function pickDeathMsg() {
+  const ids = (B.enemies || []).map(e => e.id);
+  let pool = DEATH_MSGS.any.slice();
+  for (const k of ['king', 'bishop', 'tomas', 'gareth']) if (ids.includes(k)) pool = pool.concat(DEATH_MSGS[k], DEATH_MSGS[k]);
+  if (Game.deaths >= 3) pool = pool.concat(DEATH_MSGS.many, DEATH_MSGS.many);
+  pool = pool.concat(DEATH_MSGS.ivel);
+  let m; for (let i = 0; i < 6; i++) { m = pick(pool); if (m !== Game.lastGoMsg) break; } Game.lastGoMsg = m; return m;
+}
 async function gameOver() {
   B.state = 'dead'; B.heroPose = 'down'; Music.stop(0.5); sfx('gameover');
   await wait(1.2);
-  Game.scene = 'gameover'; Game.goT = 0;
+  Game.scene = 'gameover'; Game.goT = 0; Game.deaths = (Game.deaths || 0) + 1; Game.goMsg = pickDeathMsg();
   await wait(1.5);
   const i = await choose(['Попробовать снова', 'Загрузить сохранение', 'В главное меню'], { title: 'Свеча обета погасла...' });
   if (i === 0) { G = JSON.parse(B.snap); G.hp = Math.max(G.hp, Math.ceil(maxHp() * 0.75)); Game.scene = 'battle'; await fade(1, 0.3); B.shards = null; const r = B.res; const grp = B.enemies.map(e => e.id); const o = B.opts; B.active = false; fade(0, 0.4); const res2 = await battleNoShatter(grp, o); r(res2); }
@@ -4684,7 +4701,7 @@ function render() {
   else if (Game.scene === 'world') { drawWorldUI(); if (Menu.open) drawMenu(); }
   else if (Game.scene === 'battle') drawBattleUI();
   else if (Game.scene === 'cine' && Game.cine === 'credits') drawCredits();
-  else if (Game.scene === 'gameover') { uiT(); ctx.globalAlpha = Math.min(1, Game.goT / 2); text('СВЕЧА ОБЕТА ПОГАСЛА', W / 2, 24, '#c8c0d8', 12, 'center', { w: 600 }); ctx.globalAlpha = 1; }
+  else if (Game.scene === 'gameover') { uiT(); ctx.globalAlpha = Math.min(1, Game.goT / 2); text('СВЕЧА ОБЕТА ПОГАСЛА', W / 2, 24, '#c8c0d8', 12, 'center', { w: 600 }); if (Game.goMsg && Game.goT > 1.5) { ctx.globalAlpha = Math.min(1, (Game.goT - 1.5) / 1.2); wrap(Game.goMsg, 270, 8).forEach((ln, i) => text(ln, W / 2, 132 + i * 11, '#ffd75e', 8, 'center')); } ctx.globalAlpha = 1; }
   drawDialog(); drawChoice(); drawFx();
 }
 function frame(ts) {
