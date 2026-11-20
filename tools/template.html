@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Пепельный Обет — рыцари бледной луны</title>
+<style>
+@font-face{font-family:'Pix';font-weight:400;src:url(data:font/woff2;base64,__FONT_LAT__) format('woff2');unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2190-21FF,U+2212,U+2215,U+2630;}
+@font-face{font-family:'Pix';font-weight:400;src:url(data:font/woff2;base64,__FONT_CYR__) format('woff2');unicode-range:U+0301,U+0400-045F,U+0490-0491,U+04B0-04B1,U+2116;}
+@font-face{font-family:'Pix';font-weight:700;src:url(data:font/woff2;base64,__FONT_LAT7__) format('woff2');unicode-range:U+0000-00FF,U+2000-206F;}
+@font-face{font-family:'Pix';font-weight:700;src:url(data:font/woff2;base64,__FONT_CYR7__) format('woff2');unicode-range:U+0400-045F;}
+html,body{margin:0;padding:0;background:#000;width:100%;height:100%;overflow:hidden;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
+#game{position:absolute;image-rendering:pixelated;image-rendering:crisp-edges;background:#000;outline:none}
+#loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#8a7fb0;font:16px 'Pix',monospace;letter-spacing:2px}
+#pad{position:absolute;left:0;right:0;display:none;pointer-events:none}
+body.touch #pad{display:block}
+#joy{position:absolute;pointer-events:auto;border-radius:50%;background:radial-gradient(circle,rgba(140,120,200,.18),rgba(40,30,60,.35));border:2px solid rgba(180,160,230,.35);touch-action:none}
+#knob{position:absolute;left:50%;top:50%;width:42%;height:42%;margin:-21% 0 0 -21%;border-radius:50%;background:radial-gradient(circle at 40% 35%,#d8d0f0,#6a5a9a);box-shadow:0 0 12px rgba(160,140,255,.5);pointer-events:none}
+.btn{position:absolute;pointer-events:auto;border-radius:50%;display:flex;align-items:center;justify-content:center;font:bold 22px 'Pix',monospace;color:#f0e8d0;touch-action:none;border:2px solid rgba(255,220,140,.5);background:radial-gradient(circle at 40% 35%,rgba(200,150,60,.55),rgba(80,40,20,.6));box-shadow:0 2px 0 rgba(0,0,0,.6)}
+.btn.on{transform:scale(.92);filter:brightness(1.4)}
+#bB{background:radial-gradient(circle at 40% 35%,rgba(120,120,170,.5),rgba(40,40,70,.6));border-color:rgba(180,180,240,.45)}
+#bM{border-radius:10px;font-size:18px;background:rgba(40,30,60,.6);border-color:rgba(180,160,230,.4)}
+/* portrait: controls below the screen */
+body.portrait #joy{width:min(40vw,170px);height:min(40vw,170px);left:7vw;top:calc(50% - min(20vw,85px))}
+body.portrait #bA{width:min(22vw,92px);height:min(22vw,92px);right:6vw;top:calc(50% - min(17vw,70px))}
+body.portrait #bB{width:min(16vw,68px);height:min(16vw,68px);right:calc(6vw + min(23vw,96px));top:calc(50% + min(1vw,4px))}
+body.portrait #bM{width:min(14vw,56px);height:min(10vw,40px);right:6vw;top:4px}
+body.portrait #hint{display:block}
+#hint{display:none;position:absolute;left:0;right:0;bottom:6px;text-align:center;color:#4a4560;font:13px 'Pix',sans-serif}
+/* landscape touch: controls in side columns */
+body.landscape #joy{width:calc(var(--side) * .86);height:calc(var(--side) * .86);left:calc(var(--side) * .07 + env(safe-area-inset-left) * .5);bottom:8vh}
+body.landscape #bA{width:calc(var(--side) * .52);height:calc(var(--side) * .52);right:calc(var(--side) * .08);bottom:calc(8vh + var(--side) * .42)}
+body.landscape #bB{width:calc(var(--side) * .4);height:calc(var(--side) * .4);right:calc(var(--side) * .5);bottom:8vh}
+body.landscape #bM{width:calc(var(--side) * .4);height:calc(var(--side) * .28);right:calc(var(--side) * .08);top:5vh}
+.btn{font-family:system-ui,-apple-system,'Segoe UI',sans-serif!important}
+</style>
+</head>
+<body>
+<canvas id="game" tabindex="0"></canvas>
+<div id="loading">ПЕПЕЛЬНЫЙ ОБЕТ…</div>
+<div id="pad"><div id="joy"><div id="knob"></div></div><div id="bB" class="btn">B</div><div id="bA" class="btn">A</div><div id="bM" class="btn">☰</div><div id="hint">Поверните телефон — экран станет больше</div></div>
+<script>
+__CODE__
+</script>
+</body>
+</html>

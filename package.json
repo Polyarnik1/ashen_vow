@@ -1,0 +1,8 @@
+{
+  "name": "ashen-vow",
+  "version": "1.0.0",
+  "description": "Пепельный Обет — пиксельная dark fantasy RPG с видом сверху",
+  "private": true,
+  "scripts": { "build": "node tools/build.js", "start": "python3 -m http.server 8000" },
+  "devDependencies": { "@fontsource/pixelify-sans": "^5.0.0" }
+}
