@@ -59,6 +59,32 @@ const PATS = {
   swordRainK: pw => ({ dur: 8, w: 120, h: 104, u(P) { P.ev('a', 0.26 / pw, () => { const side = irnd(0, 3); let x, y, rot; if (side === 0) { x = P.x + rnd(4, P.w - 4); y = P.y + 4; rot = Math.PI / 2; } else if (side === 1) { x = P.x + P.w - 4; y = P.y + rnd(4, P.h - 4); rot = Math.PI; } else if (side === 2) { x = P.x + rnd(4, P.w - 4); y = P.y + P.h - 4; rot = -Math.PI / 2; } else { x = P.x + 4; y = P.y + rnd(4, P.h - 4); rot = 0; } bul({ x, y, type: 'sword', len: 16, wd: 3, rot, warn: 0.5, col: '#c8d4f0', life: 3, onAct: b => { b.vx = Math.cos(rot) * 150; b.vy = Math.sin(rot) * 150; b.x -= Math.cos(rot) * 12; b.y -= Math.sin(rot) * 12; } }); }); } }),
   greyTide: pw => ({ dur: 7.5, w: 120, h: 100, u(P) { P.ev('a', 0.95 / pw, () => { const s = Math.random() < 0.5 ? 1 : -1; const g0 = rnd(P.y + 16, P.y + P.h - 16); for (let y = P.y + 3; y < P.y + P.h; y += 6) { if (Math.abs(y - g0) < 12) continue; bul({ x: s > 0 ? P.x - 4 - (y - P.y) * 0.3 : P.x + P.w + 4 + (y - P.y) * 0.3, y, vx: s * 58, r: 2.6, col: '#8a8a9a', core: '#e8e8f0', life: 4 }); } }, 0.1); } }),
   finalSeal: pw => ({ start: [0.5, 0.85], dur: 9, w: 116, h: 116, init() { this.a = 0; }, u(P, dt) { this.a += dt * 0.7; if (!this.beams) { this.beams = []; for (let k = 0; k < 3; k++) this.beams.push(bul({ x: P.cx, y: P.cy, type: 'line', len: 170, wd: 4, col: '#9fd0ff', parry: false, pierce: true, life: 10, warn: 0.9, k })); } for (const b of this.beams) b.rot = this.a + b.k * 2.094; P.ev('a', 0.45, () => { const [x, y] = edgePoint(P, irnd(0, 3)); const [vx, vy] = P.aim(x, y, 70); bul({ x, y, vx, vy, r: 3, col: '#e8f4ff', core: '#fff' }); }, 1); } }),
+  // --- Забытый Король: запоминающиеся атаки ---
+  // Замершее время: песок сыплется рядами с проходом, дважды время останавливается — успей встать в проход
+  hourglass: pw => ({ dur: 8.6, w: 118, h: 104, init() { this.fz = false; this.fast = false; this.nx = 0.3; }, u(P, dt) {
+    const t = P.t; const fz = (t > 2.5 && t < 3.5) || (t > 5.6 && t < 6.6);
+    if (fz !== this.fz) { this.fz = fz; sfx('chime', { vol: 0.4, rate: fz ? 0.6 : 1.5 }); if (!fz) this.fast = true; }
+    const blk = (t > 2.0 && t < 3.7) || (t > 5.1 && t < 6.8); if (!blk && t >= this.nx) { this.nx = t + 0.85; (() => { const gx = clamp(P.soul.x + rnd(-28, 28), P.x + 18, P.x + P.w - 18); for (let x = P.x + 3; x < P.x + P.w; x += 8) { if (Math.abs(x - gx) < 14) continue; const b = bul({ x, y: P.y - 3, vy: 42, r: 2.4, col: '#e8c878', core: '#fff3c0', life: 6 }); b.upd = bb => { bb.vy = this.fz ? 0 : (this.fast ? 56 : 42); }; } })(); }
+  } }),
+  // Колыбельная спящих: медленные «Z» плывут волнами, из центра расходится вздох-кольцо
+  lullaby: pw => ({ dur: 8, w: 118, h: 100, u(P) {
+    P.ev('a', 0.45, () => { const s = Math.random() < 0.5 ? 1 : -1; const y0 = rnd(P.y + 12, P.y + P.h - 12); const ph = rnd(6.28); const b = bul({ x: s > 0 ? P.x - 5 : P.x + P.w + 5, y: y0, vx: s * 38, r: 3, type: 'z', col: '#bcd0ff', life: 7 }); b.upd = bb => { bb.y = y0 + Math.sin(bb.t * 2.1 + ph) * 17; }; }, 0.2);
+    P.ev('b', 2.3, () => { const g = Math.atan2(P.soul.y - P.cy, P.soul.x - P.cx) + rnd(-0.5, 0.5); bul({ type: 'ring', x: P.cx, y: P.cy, rad: 4, grow: 30, th: 4, col: '#a8bce8', gap: g, gapW: 1.7, parry: false, pierce: true, life: 4 }); sfx('ghost', { vol: 0.3 }); }, 1.1);
+  } }),
+  // Скипетр Пустоты: «трезубец» из трёх лучей по вертикали или горизонтали, между зубьями — проход
+  sceptre: pw => ({ dur: 8.4, w: 120, h: 100, init() { this.n = 0; }, u(P) {
+    P.ev('a', 1.85, () => { const vert = this.n++ % 2 === 0; const sp = 32;
+      for (let k = -1; k <= 1; k++) {
+        if (vert) { const x = clamp(P.soul.x, P.x + sp + 6, P.x + P.w - sp - 6) + k * sp; warnBeam({ x: x - 4.5, y: P.y, w: 9, h: P.h, col: '#9fd0ff', wcol: '#9fd0ff', warn: 0.8, onAct: () => { if (k === 0) { sfx('boom', { vol: 0.3 }); shake(2); } } }); }
+        else { const y = clamp(P.soul.y, P.y + sp + 6, P.y + P.h - sp - 6) + k * sp; warnBeam({ x: P.x, y: y - 4.5, w: P.w, h: 9, col: '#9fd0ff', wcol: '#9fd0ff', warn: 0.8, onAct: () => { if (k === 0) { sfx('boom', { vol: 0.3 }); shake(2); } } }); }
+      } }, 0.4);
+    P.ev('b', 0.5, () => { const [x, y] = edgePoint(P, irnd(0, 3)); const [vx, vy] = P.aim(x, y, 52); bul({ x, y, vx, vy, r: 2.5, col: '#d8e8ff', core: '#fff' }); }, 1.2);
+  } }),
+  // Падение короны: кольцо шипов сжимается к центру; проход всегда там, где стоит рыцарь, но звезда шипов бьёт сверху
+  crownCollapse: pw => ({ dur: 8.2, w: 124, h: 112, u(P) {
+    P.ev('a', 2.1, () => { const g = Math.atan2(P.soul.y - P.cy, P.soul.x - P.cx) + rnd(-0.35, 0.35); const b = bul({ type: 'ring', x: P.cx, y: P.cy, rad: 92, grow: -29, th: 5, col: '#c8c8d8', gap: g, gapW: 1.25, parry: false, pierce: true, life: 3.4 }); b.upd = bb => { if (bb.rad < 5) bb.dead = true; }; sfx('rumble', { vol: 0.3 }); }, 0.3);
+    P.ev('b', 0.55, () => { bul({ x: P.x + rnd(6, P.w - 6), y: P.y - 4, vy: 62, type: 'shard', r: 3, col: '#b8b8c8', life: 4 }); }, 0.9);
+  } }),
   kingMercy: pw => ({ dur: 6, w: 96, h: 90, u(P) { P.ev('a', 0.4, () => bul({ x: P.x + rnd(P.w), y: P.y - 4, vy: 22, r: 3, col: '#c8d8ff', core: '#fff', type: 'dust' })); } }),
   calm: pw => ({ dur: 4, w: 80, h: 70, u(P) { P.ev('a', 0.6, () => bul({ x: P.x + rnd(P.w), y: P.y - 4, vy: 26, r: 2.5, col: '#9a95a8' })); } }),
 };

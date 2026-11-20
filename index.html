@@ -2470,7 +2470,9 @@ function damageEnemy(e, dmg, crit) {
   if (e.d.onHit) e.d.onHit(e);
 }
 async function killEnemy(e) {
-  if (e.d.boss && e.d.onDefeat) { await e.d.onDefeat(e); if (!e.dead && e.hp > 0) return; }
+  if (e.dead || e.spared) return;
+  if (e.d.boss && e.d.onDefeat) { await e.d.onDefeat(e); if (e.spared || (!e.dead && e.hp > 0)) return; }
+  if (e.dead) return;
   e.dead = true; e.dying = 0.001; sfx('die');
   G.killed++;
   B.special.killedAny = true;
@@ -2479,7 +2481,7 @@ async function doAct(e, a) {
   if (a.check) { await btext(`[y]${e.name}[/] — АТК ${e.d.atk} ЗАЩ ${e.d.def}. ${e.d.check}`); return; }
   if (a.spare) {
     if (e.mercy >= 100) { await spareEnemy(e); }
-    else { sfx('deny'); await btext(e.d.noSpare || `Ты предлагаешь пощаду... но ${e.name} не готов${e.d.fem ? 'а' : ''} её принять.`); }
+    else { sfx('deny'); await btext((typeof e.d.noSpare === 'function' ? e.d.noSpare(e) : e.d.noSpare) || `Ты предлагаешь пощаду... но ${e.name} не готов${e.d.fem ? 'а' : ''} её принять.`); }
     return;
   }
   e.acts[a.n] = (e.acts[a.n] || 0) + 1;
@@ -3016,6 +3018,32 @@ const PATS = {
   swordRainK: pw => ({ dur: 8, w: 120, h: 104, u(P) { P.ev('a', 0.26 / pw, () => { const side = irnd(0, 3); let x, y, rot; if (side === 0) { x = P.x + rnd(4, P.w - 4); y = P.y + 4; rot = Math.PI / 2; } else if (side === 1) { x = P.x + P.w - 4; y = P.y + rnd(4, P.h - 4); rot = Math.PI; } else if (side === 2) { x = P.x + rnd(4, P.w - 4); y = P.y + P.h - 4; rot = -Math.PI / 2; } else { x = P.x + 4; y = P.y + rnd(4, P.h - 4); rot = 0; } bul({ x, y, type: 'sword', len: 16, wd: 3, rot, warn: 0.5, col: '#c8d4f0', life: 3, onAct: b => { b.vx = Math.cos(rot) * 150; b.vy = Math.sin(rot) * 150; b.x -= Math.cos(rot) * 12; b.y -= Math.sin(rot) * 12; } }); }); } }),
   greyTide: pw => ({ dur: 7.5, w: 120, h: 100, u(P) { P.ev('a', 0.95 / pw, () => { const s = Math.random() < 0.5 ? 1 : -1; const g0 = rnd(P.y + 16, P.y + P.h - 16); for (let y = P.y + 3; y < P.y + P.h; y += 6) { if (Math.abs(y - g0) < 12) continue; bul({ x: s > 0 ? P.x - 4 - (y - P.y) * 0.3 : P.x + P.w + 4 + (y - P.y) * 0.3, y, vx: s * 58, r: 2.6, col: '#8a8a9a', core: '#e8e8f0', life: 4 }); } }, 0.1); } }),
   finalSeal: pw => ({ start: [0.5, 0.85], dur: 9, w: 116, h: 116, init() { this.a = 0; }, u(P, dt) { this.a += dt * 0.7; if (!this.beams) { this.beams = []; for (let k = 0; k < 3; k++) this.beams.push(bul({ x: P.cx, y: P.cy, type: 'line', len: 170, wd: 4, col: '#9fd0ff', parry: false, pierce: true, life: 10, warn: 0.9, k })); } for (const b of this.beams) b.rot = this.a + b.k * 2.094; P.ev('a', 0.45, () => { const [x, y] = edgePoint(P, irnd(0, 3)); const [vx, vy] = P.aim(x, y, 70); bul({ x, y, vx, vy, r: 3, col: '#e8f4ff', core: '#fff' }); }, 1); } }),
+  // --- Забытый Король: запоминающиеся атаки ---
+  // Замершее время: песок сыплется рядами с проходом, дважды время останавливается — успей встать в проход
+  hourglass: pw => ({ dur: 8.6, w: 118, h: 104, init() { this.fz = false; this.fast = false; this.nx = 0.3; }, u(P, dt) {
+    const t = P.t; const fz = (t > 2.5 && t < 3.5) || (t > 5.6 && t < 6.6);
+    if (fz !== this.fz) { this.fz = fz; sfx('chime', { vol: 0.4, rate: fz ? 0.6 : 1.5 }); if (!fz) this.fast = true; }
+    const blk = (t > 2.0 && t < 3.7) || (t > 5.1 && t < 6.8); if (!blk && t >= this.nx) { this.nx = t + 0.85; (() => { const gx = clamp(P.soul.x + rnd(-28, 28), P.x + 18, P.x + P.w - 18); for (let x = P.x + 3; x < P.x + P.w; x += 8) { if (Math.abs(x - gx) < 14) continue; const b = bul({ x, y: P.y - 3, vy: 42, r: 2.4, col: '#e8c878', core: '#fff3c0', life: 6 }); b.upd = bb => { bb.vy = this.fz ? 0 : (this.fast ? 56 : 42); }; } })(); }
+  } }),
+  // Колыбельная спящих: медленные «Z» плывут волнами, из центра расходится вздох-кольцо
+  lullaby: pw => ({ dur: 8, w: 118, h: 100, u(P) {
+    P.ev('a', 0.45, () => { const s = Math.random() < 0.5 ? 1 : -1; const y0 = rnd(P.y + 12, P.y + P.h - 12); const ph = rnd(6.28); const b = bul({ x: s > 0 ? P.x - 5 : P.x + P.w + 5, y: y0, vx: s * 38, r: 3, type: 'z', col: '#bcd0ff', life: 7 }); b.upd = bb => { bb.y = y0 + Math.sin(bb.t * 2.1 + ph) * 17; }; }, 0.2);
+    P.ev('b', 2.3, () => { const g = Math.atan2(P.soul.y - P.cy, P.soul.x - P.cx) + rnd(-0.5, 0.5); bul({ type: 'ring', x: P.cx, y: P.cy, rad: 4, grow: 30, th: 4, col: '#a8bce8', gap: g, gapW: 1.7, parry: false, pierce: true, life: 4 }); sfx('ghost', { vol: 0.3 }); }, 1.1);
+  } }),
+  // Скипетр Пустоты: «трезубец» из трёх лучей по вертикали или горизонтали, между зубьями — проход
+  sceptre: pw => ({ dur: 8.4, w: 120, h: 100, init() { this.n = 0; }, u(P) {
+    P.ev('a', 1.85, () => { const vert = this.n++ % 2 === 0; const sp = 32;
+      for (let k = -1; k <= 1; k++) {
+        if (vert) { const x = clamp(P.soul.x, P.x + sp + 6, P.x + P.w - sp - 6) + k * sp; warnBeam({ x: x - 4.5, y: P.y, w: 9, h: P.h, col: '#9fd0ff', wcol: '#9fd0ff', warn: 0.8, onAct: () => { if (k === 0) { sfx('boom', { vol: 0.3 }); shake(2); } } }); }
+        else { const y = clamp(P.soul.y, P.y + sp + 6, P.y + P.h - sp - 6) + k * sp; warnBeam({ x: P.x, y: y - 4.5, w: P.w, h: 9, col: '#9fd0ff', wcol: '#9fd0ff', warn: 0.8, onAct: () => { if (k === 0) { sfx('boom', { vol: 0.3 }); shake(2); } } }); }
+      } }, 0.4);
+    P.ev('b', 0.5, () => { const [x, y] = edgePoint(P, irnd(0, 3)); const [vx, vy] = P.aim(x, y, 52); bul({ x, y, vx, vy, r: 2.5, col: '#d8e8ff', core: '#fff' }); }, 1.2);
+  } }),
+  // Падение короны: кольцо шипов сжимается к центру; проход всегда там, где стоит рыцарь, но звезда шипов бьёт сверху
+  crownCollapse: pw => ({ dur: 8.2, w: 124, h: 112, u(P) {
+    P.ev('a', 2.1, () => { const g = Math.atan2(P.soul.y - P.cy, P.soul.x - P.cx) + rnd(-0.35, 0.35); const b = bul({ type: 'ring', x: P.cx, y: P.cy, rad: 92, grow: -29, th: 5, col: '#c8c8d8', gap: g, gapW: 1.25, parry: false, pierce: true, life: 3.4 }); b.upd = bb => { if (bb.rad < 5) bb.dead = true; }; sfx('rumble', { vol: 0.3 }); }, 0.3);
+    P.ev('b', 0.55, () => { bul({ x: P.x + rnd(6, P.w - 6), y: P.y - 4, vy: 62, type: 'shard', r: 3, col: '#b8b8c8', life: 4 }); }, 0.9);
+  } }),
   kingMercy: pw => ({ dur: 6, w: 96, h: 90, u(P) { P.ev('a', 0.4, () => bul({ x: P.x + rnd(P.w), y: P.y - 4, vy: 22, r: 3, col: '#c8d8ff', core: '#fff', type: 'dust' })); } }),
   calm: pw => ({ dur: 4, w: 80, h: 70, u(P) { P.ev('a', 0.6, () => bul({ x: P.x + rnd(P.w), y: P.y - 4, vy: 26, r: 2.5, col: '#9a95a8' })); } }),
 };
@@ -3258,21 +3286,60 @@ const ENEMIES = {
     check: 'Король Альдерих. Заключил сделку с Пустотой, чтобы его народ никогда не умер. Теперь никто не просыпается.',
     flavor: ['Корона звенит осколками.', 'Печать на полу пульсирует серым светом.', 'Где-то далеко спит целое королевство.', 'Король смотрит сквозь тебя — на что-то давно потерянное.'],
     lowTxt: 'Корона трескается. Король шатается.',
-    talkFn: e => e.mercy >= 100 ? 'Я... слышу их...' : e.hp < e.maxhp * 0.35 ? pick(['Без меня они умрут!', 'Я ИХ ЗАЩИЩАЮ!', 'Сон — это милосердие!']) : pick(['Ты снова пришёл запечатать меня?', 'Мой народ спит. Мой народ жив.', 'Склонись, рыцарь.', 'Смерть не войдёт в моё королевство.']),
-    patFn: e => { const r = e.hp / e.maxhp; if (e.mercy >= 60) return 'kingMercy'; if (r > 0.7) return pick(['crownShards', 'sealRunes', 'greyTide']); if (r > 0.35) return pick(['swordRainK', 'sealRunes', 'crownShards', 'greyTide']); return pick(['finalSeal', 'swordRainK', 'crownShards']); },
+    talkFn: e => {
+      if (F('king_pac')) {
+        if (e.mercy >= 100) return 'Не жалей меня. Прошу.';
+        if (e.hp < e.maxhp * 0.4) return pick(['Да... вот так...', 'Не бойся. Я так давно этого жду.', 'Ты — единственный чистый клинок.', 'Рука не слушается... Прости.']);
+        return pick(['Прости. Пустота держит мою руку.', 'Ты не пролил ничьей крови... Как редко.', 'Не жалей меня, рыцарь.', 'Я устал. Я так устал.', 'Увернись. Я не хочу ранить тебя.']);
+      }
+      return e.mercy >= 100 ? 'Я... слышу их...' : e.hp < e.maxhp * 0.35 ? pick(['Без меня они умрут!', 'Я ИХ ЗАЩИЩАЮ!', 'Сон — это милосердие!']) : pick(['Ты снова пришёл запечатать меня?', 'Мой народ спит. Мой народ жив.', 'Склонись, рыцарь.', 'Смерть не войдёт в моё королевство.']);
+    },
+    patFn: e => { const r = e.hp / e.maxhp; if (e.mercy >= 60) return 'kingMercy'; if (r > 0.7) return pick(['crownShards', 'hourglass', 'lullaby', 'greyTide']); if (r > 0.35) return pick(['sceptre', 'crownCollapse', 'sealRunes', 'hourglass', 'swordRainK', 'lullaby']); return pick(['finalSeal', 'sceptre', 'crownCollapse', 'swordRainK', 'crownShards']); },
     acts: [
       { n: 'Голос пекаря', d: 'Сон пекаря', cond: () => F('voice1'), t: 'Ты передаёшь сон пекаря: «Хлеб остывает... кто его съест, если все спят?» Король вздрагивает.', m: 20, once: true, reply: 'Марк..?' },
       { n: 'Голос матери', d: 'Сон матери', cond: () => F('voice2'), t: 'Ты передаёшь сон матери: «Моя дочь так и не научилась ходить. Она спит в колыбели сто лет».', m: 20, once: true, reply: '...сто лет...' },
       { n: 'Голос девочки', d: 'Сон девочки', cond: () => F('voice3'), t: 'Ты передаёшь сон девочки: «Я хочу увидеть утро. Хоть одно. Пожалуйста».', m: 20, once: true, reply: 'Утро...' },
       { n: 'Снять корону', d: 'После голосов', cond: e => e.mercy >= 60, t: 'Ты протягиваешь руку к короне. Король не сопротивляется. «Отпусти их, Альдерих. Смерть — не враг. Враг — вечная ночь».', m: 40, once: true },
-      { n: 'Обратиться к королю', t: '«Альдерих! Твой народ не жив — он заперт!» Король смеётся. Без голосов спящих слова пусты.', m: 5, once: true },
+      { n: 'Спросить о сделке', d: 'Он ждёт этого', cond: () => F('king_pac'), t: 'Ты спрашиваешь, что держит печать. «Моя жизнь, — тихо говорит король. — Пока я дышу, они спят. Разорвать её может лишь клинок, не знавший крови. Твой».', m: 5, once: true, reply: 'Ты же понимаешь, о чём я прошу.' },
+      { n: 'Обратиться к королю', cond: () => !F('king_pac'), t: '«Альдерих! Твой народ не жив — он заперт!» Король смеётся. Без голосов спящих слова пусты.', m: 5, once: true },
     ],
-    noSpare: 'Король не слышит тебя. Нужны голоса тех, кого он «спас».',
+    noSpare: e => F('king_pac') ? 'Король качает головой: «Не щади меня. Закончи это — или дай мне услышать их голоса».' : 'Король не слышит тебя. Нужны голоса тех, кого он «спас».',
     readyTxt: 'Корона соскальзывает с головы короля. Печать гаснет.',
-    onSpare: async e => { setF('king_spared'); return true; },
+    onSpare: async e => {
+      if (F('king_pac') && !e.finaleDone) { await kingResolve(e); return false; }
+      setF('king_spared'); return true;
+    },
+    onDefeat: async e => {
+      if (F('king_pac') && !e.finaleDone && !e.finalStrike) { e.hp = 1; await kingResolve(e); }
+    },
     sparedTxt: 'Король закрывает глаза. «Пусть просыпаются», — шепчет он и становится пеплом.'
   },
 };
+
+// Финальный выбор Короля в прохождении без убийств: он сам просит о смерти (как Азгор), но решает игрок
+async function kingResolve(e) {
+  e.finaleDone = true; e.finalStrike = false;
+  B.bubbles = []; B.heroPose = 'idle';
+  sfx('chime', { vol: 0.5, rate: 0.7 });
+  await btext('Король опускает скипетр. Печать замирает. В зале становится тихо-тихо.');
+  const voices = e.mercy >= 100;
+  await btext(voices ? '[y]Король:[/] «Они говорят со мной... Я слышу каждого. И всё равно — прошу, закончи».' : '[y]Король:[/] «Ты не поднял меча на живое. Только твой удар может разорвать печать. Прошу, рыцарь».');
+  const c = await choose(['Ударить', 'Пощадить'], { title: 'Король ждёт. Руки опущены.' });
+  if (c === 0) {
+    setF('king_mercy_strike'); e.finalStrike = true;
+    await btext('Ты поднимаешь меч. Король закрывает глаза и улыбается — впервые за сто лет.');
+    await heroStrike(e, e.hp + 5, true, true);
+    return;
+  }
+  if (!voices) {
+    sfx('deny');
+    await btext('[y]Король:[/] «Милосердный... Но пока я жив, они спят. Твоя пощада их не разбудит».');
+    await btext('[y]Король:[/] «Если не можешь ударить — найди их голоса. И тогда решай».');
+    e.finaleDone = false; e.hp = Math.max(e.hp, Math.ceil(e.maxhp * 0.3)); e.pacRefused = true;
+    return;
+  }
+  await spareEnemy(e);
+}
 
 // ---- 09_maps.js ----
 // ================= MAP BUILDER =================
@@ -3961,29 +4028,71 @@ const STORY = {
     await fade(0, 1.2);
   },
   async kingFight() {
+    const pac = G.killed === 0;           // прошёл, никого не убив — Король сам просит о смерти
+    if (pac) setF('king_pac');
     await camTo(13, 5, 1.5);
-    await say('Король Альдерих', 'Рыцарь Бледной Луны. Снова.', { p: 'king' });
-    await say('Король Альдерих', 'Ты уже отнял у меня жизнь однажды. Теперь пришёл отнять и сон моего народа?', { p: 'king' });
-    await say('Король Альдерих', 'Пустота обещала: никто в моём королевстве не умрёт. Я сдержал слово. Они живы.', { p: 'king' });
-    await IV('Они не живы! Они заперты! Сто лет в одном сне!', 2);
-    await say('Король Альдерих', 'Жрица... И ты здесь. Как трогательно. Твоя луна погасла, девочка.', { p: 'king' });
-    const c = await choose(['Отпусти их, Альдерих', 'Я пришёл закончить это']);
-    if (c === 0) await say('Король Альдерих', 'Отпустить — значит отдать смерти. Никогда.', { p: 'king' });
-    else await say('Король Альдерих', 'Тогда склонись перед Серой Короной, рыцарь!', { p: 'king', shake: 0.5 });
+    if (pac) {
+      await say('Король Альдерих', 'Рыцарь Бледной Луны... Ты пришёл. И на твоих руках нет крови. Ни одной капли.', { p: 'king' });
+      await say('Король Альдерих', 'Я ждал такого. Сто лет. Печать вросла в моё сердце — пока оно бьётся, мой народ не проснётся.', { p: 'king' });
+      await say('Король Альдерих', 'Разорвать её может только чистый клинок. Только удар того, кто не убивал.', { p: 'king' });
+      await IV('Ардан... он хочет, чтобы ты..? Нет! Должен быть другой путь!', 2);
+      await say('Король Альдерих', 'Жрица, не плачь. Я стар и устал. Это не казнь — это просьба.', { p: 'king' });
+      await say('Король Альдерих', 'Но Пустота ещё держит мою руку. Я буду нападать. Прости. Не жалей меня — увернись и закончи.', { p: 'king', shake: 0.3 });
+      await choose(['Я постараюсь тебя услышать', 'Я не хочу этого']);
+      await say('Король Альдерих', 'Тогда — вот моя корона. И моя вина. Начнём.', { p: 'king' });
+    } else {
+      await say('Король Альдерих', 'Рыцарь Бледной Луны. Снова.', { p: 'king' });
+      await say('Король Альдерих', 'Ты уже отнял у меня жизнь однажды. Теперь пришёл отнять и сон моего народа?', { p: 'king' });
+      await say('Король Альдерих', 'Пустота обещала: никто в моём королевстве не умрёт. Я сдержал слово. Они живы.', { p: 'king' });
+      await IV('Они не живы! Они заперты! Сто лет в одном сне!', 2);
+      await say('Король Альдерих', 'Жрица... И ты здесь. Как трогательно. Твоя луна погасла, девочка.', { p: 'king' });
+      const c = await choose(['Отпусти их, Альдерих', 'Я пришёл закончить это']);
+      if (c === 0) await say('Король Альдерих', 'Отпустить — значит отдать смерти. Никогда.', { p: 'king' });
+      else await say('Король Альдерих', 'Тогда склонись перед Серой Короной, рыцарь!', { p: 'king', shake: 0.5 });
+    }
     camFree(); sfx('roar', { rate: 0.6 }); shake(5);
     let said = {};
     const r = await battle(['king'], { area: 'king', music: 't29', boss: true,
-      flavor: () => G.voices > 0 && !said.v ? 'Ты помнишь сны спящих. Может, король должен их услышать?' : null,
+      flavor: () => G.voices > 0 && !said.v ? 'Ты помнишь сны спящих. Может, король должен их услышать?' : (pac && !said.p ? 'Король не защищается. Он смотрит на твой меч — и ждёт.' : null),
       afterAttack: async () => {
-        const k = B.enemies[0]; const ratio = k.hp / k.maxhp;
+        const k = B.enemies[0]; if (!k || k.dead || k.spared) return; const ratio = k.hp / k.maxhp;
+        if (pac) {
+          if (ratio < 0.66 && !said.a) { said.a = 1; await btext('Король: «Хорошо... Ты уворачиваешься лучше, чем я целился. Спасибо».'); }
+          if (ratio < 0.4 && !said.b) { said.b = 1; await btext('Корона трещит. Король: «Вот так. Не отводи взгляд. Это... не страшно».'); }
+          if (k.mercy >= 60 && !said.c) { said.c = 1; await btext('Голоса спящих звучат в зале. Король закрывает лицо рукой. «Марк... Анна... маленькая Эла...»'); }
+          if (!k.finaleDone && (k.mercy >= 100 || (ratio <= 0.25 && !k.pacRefused))) await kingResolve(k);
+          return;
+        }
         if (ratio < 0.66 && !said.a) { said.a = 1; await btext('Король: «Ты не понимаешь! Я видел, как они умирали от чумы!»'); }
         if (ratio < 0.33 && !said.b) { said.b = 1; await btext('Корона трещит. Король: «Если я паду — все они умрут! ВСЕ!»'); }
         if (k.mercy >= 60 && !said.c) { said.c = 1; await btext('Король дрожит. Голоса спящих звучат в зале. «Марк... Анна... маленькая Эла...»'); }
       } });
     setF('king_done');
-    if (r === 'spare') await STORY.endingDawn(); else await STORY.endingWatch();
+    if (r === 'spare') await STORY.endingDawn(); else if (F('king_mercy_strike')) await STORY.endingRest(); else await STORY.endingWatch();
+  },
+  async endingRest() {
+    await say('Король Альдерих', 'Тепло... Как давно я не чувствовал тепла.', { p: 'king' });
+    await say('Король Альдерих', 'Спасибо, рыцарь. Твоя рука не дрогнула — и не должна была. Это не убийство. Это — конец долгой ночи.', { p: 'king' });
+    await IV('Альдерих... Я передам им. Каждому. Что ты их слышал.', 2);
+    await say('Король Альдерих', 'Скажи Эле: утро — самое красивое, что есть. А мне... дай просто уснуть. По-настоящему.', { p: 'king' });
+    sfx('shatter'); flash('#fff', 1); shake(6);
+    await fade(1, 1.5, '#fff');
+    Music.play('t15', { fade: 2 });
+    Game.scene = 'cine'; Game.cine = 'dawn'; Game.cineT = 0;
+    await fade(0, 2, '#fff');
+    await nar('Серая корона упала на камни и рассыпалась. Печать погасла — вместе с тем, кто сто лет держал её на своём сердце.', { top: true });
+    await nar('Над Вальдмором взошло солнце. В Спящем королевстве люди открывали глаза, не помня, как долго спали.', { top: true });
+    await nar('Маленькая Эла увидела утро. А на троне остался лишь плащ, расшитый звёздами, — и тихий покой.', { top: true });
+    if (F('gareth_spared')) await nar('У Терновой Стены седой рыцарь Гарет снял шлем и долго стоял, глядя на рассвет.', { top: true });
+    await nar('Рыцарь Бледной Луны остался в пустом зале. Меч в его руке был чист — как и тогда, когда он пришёл.', { top: true });
+    await IV('Ардан... Ты ведь тоже уйдёшь, когда рассвет коснётся тебя?', 2, { top: true });
+    await AR('Пусть. Я исполнил обет — никого не убив до самого конца. Кроме того, кто просил.', { top: true });
+    await IV('Тогда я иду с тобой. Я — маленький огонёк. Но светить умею.', 1, { top: true });
+    await nar('Рыцарь из пепла и голубой огонёк растаяли в первых лучах солнца. А над троном ещё долго стоял тихий звон, похожий на «спасибо».', { top: true });
+    await STORY.credits('Милосердный удар');
   },
   async endingDawn() {
+    if (F('king_pac')) await say('Король Альдерих', 'Ты пощадил меня... хотя я просил иного. Что ж. Милосердие — тоже чистый клинок.', { p: 'king' });
     await say('Король Альдерих', 'Я слышу их... Как же я устал.', { p: 'king', m: 3 });
     await say('Король Альдерих', 'Пусть просыпаются. Пусть живут. И пусть... умирают, когда придёт их время.', { p: 'king' });
     sfx('shatter'); flash('#fff', 1); shake(6);

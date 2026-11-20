@@ -247,7 +247,9 @@ function damageEnemy(e, dmg, crit) {
   if (e.d.onHit) e.d.onHit(e);
 }
 async function killEnemy(e) {
-  if (e.d.boss && e.d.onDefeat) { await e.d.onDefeat(e); if (!e.dead && e.hp > 0) return; }
+  if (e.dead || e.spared) return;
+  if (e.d.boss && e.d.onDefeat) { await e.d.onDefeat(e); if (e.spared || (!e.dead && e.hp > 0)) return; }
+  if (e.dead) return;
   e.dead = true; e.dying = 0.001; sfx('die');
   G.killed++;
   B.special.killedAny = true;
@@ -256,7 +258,7 @@ async function doAct(e, a) {
   if (a.check) { await btext(`[y]${e.name}[/] — АТК ${e.d.atk} ЗАЩ ${e.d.def}. ${e.d.check}`); return; }
   if (a.spare) {
     if (e.mercy >= 100) { await spareEnemy(e); }
-    else { sfx('deny'); await btext(e.d.noSpare || `Ты предлагаешь пощаду... но ${e.name} не готов${e.d.fem ? 'а' : ''} её принять.`); }
+    else { sfx('deny'); await btext((typeof e.d.noSpare === 'function' ? e.d.noSpare(e) : e.d.noSpare) || `Ты предлагаешь пощаду... но ${e.name} не готов${e.d.fem ? 'а' : ''} её принять.`); }
     return;
   }
   e.acts[a.n] = (e.acts[a.n] || 0) + 1;
